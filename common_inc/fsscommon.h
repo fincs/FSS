@@ -146,3 +146,16 @@ typedef struct
 	void* ptr;
 	int param;
 } msg_ptrwithparam;
+
+typedef struct
+{
+	msg_ptrwithparam msg;
+	union
+	{
+		fss_chndata_t chnData;
+		fss_trkdata_t trkData;
+		fss_plydata_t plyData;
+	};
+} fss_sharedwork_t;
+
+#define FSS_SHAREDWORKSIZE ((sizeof(fss_sharedwork_t) + 31) &~ 31)

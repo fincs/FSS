@@ -4,6 +4,17 @@ int fssFifoCh = -1;
 static int fssRefCount = 0;
 static instance_t fssArm7Handle;
 
+// The funny 32-byte stuff is because it's the size of a cache line
+__attribute__((aligned(32))) static byte_t __sharedworkBuf[FSS_SHAREDWORKSIZE];
+static fss_sharedwork_t* sharedWork;
+
+FEOSINIT void initSharedWork()
+{
+	DC_FlushRange(__sharedworkBuf, sizeof(__sharedworkBuf));
+	sharedWork = (fss_sharedwork_t*) memUncached(__sharedworkBuf);
+	sharedWork->msg.ptr = &sharedWork->chnData;
+}
+
 static inline int _callARM7(int x, u8* y)
 {
 	fifoSendDatamsg(fssFifoCh, x, y);
@@ -11,6 +22,14 @@ static inline int _callARM7(int x, u8* y)
 }
 
 #define CALL_ARM7() _callARM7(sizeof(msg), (u8*)&msg)
+
+static inline int _callARM7_addr(void* addr)
+{
+	fifoSendAddress(fssFifoCh, addr);
+	return (int) fifoGetRetValue(fssFifoCh);
+}
+
+#define CALL_ARM7_ADDR() _callARM7_addr(sharedWork)
 
 bool FSS_Startup()
 {
@@ -268,6 +287,7 @@ void FSS_StopCapture(int mask)
 	CALL_ARM7();
 }
 
+/*
 void FSS_PlayerRead(int handle, fss_plydata_t* pData)
 {
 	msg_ptrwithparam msg;
@@ -299,4 +319,32 @@ void FSS_ChannelRead(int handle, fss_chndata_t* pData)
 
 	DC_FlushRange(pData, sizeof(fss_chndata_t));
 	CALL_ARM7();
+}
+*/
+
+void FSS_PlayerRead(int handle, fss_plydata_t* pData)
+{
+	sharedWork->msg.msgtype = FSSFIFO_PLAYERREAD;
+	sharedWork->msg.param = handle;
+	CALL_ARM7_ADDR();
+
+	memcpy(pData, &sharedWork->plyData, sizeof(fss_plydata_t));
+}
+
+void FSS_TrackRead(int handle, fss_trkdata_t* pData)
+{
+	sharedWork->msg.msgtype = FSSFIFO_TRACKREAD;
+	sharedWork->msg.param = handle;
+	CALL_ARM7_ADDR();
+
+	memcpy(pData, &sharedWork->trkData, sizeof(fss_trkdata_t));
+}
+
+void FSS_ChannelRead(int handle, fss_chndata_t* pData)
+{
+	sharedWork->msg.msgtype = FSSFIFO_CHANNELREAD;
+	sharedWork->msg.param = handle;
+	CALL_ARM7_ADDR();
+
+	memcpy(pData, &sharedWork->chnData, sizeof(fss_chndata_t));
 }

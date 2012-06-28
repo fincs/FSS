@@ -3,18 +3,21 @@
 int fssFifoCh;
 
 static void fssDatamsgHandler(int nBytes, void* user_data);
+static void fssAddressHandler(void* address, void* user_data);
 
 int arm7_main(int fifoCh)
 {
 	fssFifoCh = fifoCh;
 	Snd_Init();
 	coopFifoSetDatamsgHandler(fifoCh, fssDatamsgHandler, NULL);
+	fifoSetAddressHandler(fifoCh, fssAddressHandler, NULL);
 	return 0;
 }
 
 void arm7_fini()
 {
 	coopFifoSetDatamsgHandler(fssFifoCh, NULL, NULL);
+	fifoSetAddressHandler(fssFifoCh, NULL, NULL);
 	Snd_Deinit();
 }
 
@@ -107,6 +110,13 @@ void fssDatamsgHandler(int nBytes, void* user_data)
 			Cap_StopReplay(((msg_generic*) rBuf)->which);
 			fifoReturn(fssFifoCh, 0);
 			break;
+	}
+}
+
+void fssAddressHandler(void* rBuf, void* user_data)
+{
+	switch (*(int*)rBuf)
+	{
 		case FSSFIFO_PLAYERREAD:
 			Cmd_PlayerRead((msg_ptrwithparam*) rBuf);
 			break;
