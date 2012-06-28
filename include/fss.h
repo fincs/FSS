@@ -1,0 +1,148 @@
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef FSS_BUILD
+#define FSS_API FEOS_EXPORT
+#else
+#define FSS_API
+#endif
+
+FSS_API bool FSS_Startup();
+FSS_API void FSS_Cleanup();
+
+enum { SoundFormat_8Bit, SoundFormat_16Bit, SoundFormat_ADPCM, SoundFormat_Loop = 4 };
+enum { DutyCycle_0 = 7, DutyCycle_12 = 0, DutyCycle_25, DutyCycle_37, DutyCycle_50, DutyCycle_62, DutyCycle_75, DutyCycle_87 };
+#define SOUND_TIMER(n) (0x1000000/((int)(n)))
+#define CAP_TIMER(n) SOUND_TIMER(n)
+#define TONE_TIMER(n) SOUND_TIMER((n)*8)
+#define INVALID_SND_HANDLE (-1)
+#define DEFAULT_PRIO 0x80
+
+#define __Mixer 0
+#define __Chn1 1
+#define __Chn3 2
+#define OutFlags_LeftOutFrom(x) ((x)<<8)
+#define OutFlags_RightOutFrom(x) ((x)<<10)
+
+enum
+{
+	OutFlags_LeftDisableDry = OutFlags_LeftOutFrom(__Chn1),
+	OutFlags_RightDisableDry = OutFlags_RightOutFrom(__Chn3),
+	OutFlags_MixerNoCh1 = BIT(12),
+	OutFlags_MixerNoCh3 = BIT(13)
+};
+
+enum
+{
+	CapId_Left = BIT(8),
+	CapId_Right = BIT(9)
+};
+
+enum
+{
+	CapFlags_AddAssocChnToPrevChn = BIT(0),
+	CapFlags_SourceIsMixer = 0,
+	CapFlags_SourceIsPrevChn = BIT(1),
+	CapFlags_Loop = 0,
+	CapFlags_OneShot = BIT(2),
+	CapFlags_Format_16Bit = 0,
+	CapFlags_Format_8Bit = BIT(3)
+};
+
+enum
+{
+	CapStatus_Active = 1,
+	CapStatus_Disabled = 0,
+};
+
+typedef struct
+{
+	const void* data;
+	word_t length;
+	hword_t loopPoint;
+	hword_t format;
+} fss_sample_t;
+
+#include "fssdata.h"
+
+FSS_API int FSS_PlaySample(fss_sample_t* pSample, int timer, int volume, int pan, int prio);
+FSS_API int FSS_PlayTone(int duty, int timer, int volume, int pan, int prio);
+FSS_API int FSS_PlayNoise(int timer, int volume, int pan, int prio);
+
+enum { Param_Volume, Param_Pan, Param_Timer, Param_Duty };
+
+FSS_API bool FSS_ChnIsActive(int handle);
+FSS_API void FSS_ChnStop(int handle);
+FSS_API void FSS_ChnSetParam(int handle, int type, int param);
+
+static inline void FSS_ChnSetVolume(int handle, int vol)
+{
+	FSS_ChnSetParam(handle, Param_Volume, vol);
+}
+
+static inline void FSS_ChnSetPan(int handle, int pan)
+{
+	FSS_ChnSetParam(handle, Param_Pan, pan);
+}
+
+static inline void FSS_ChnSetTimer(int handle, int timer)
+{
+	FSS_ChnSetParam(handle, Param_Timer, timer);
+}
+
+static inline void FSS_ChnSetDuty(int handle, int duty)
+{
+	FSS_ChnSetParam(handle, Param_Duty, duty);
+}
+
+FSS_API int FSS_PlayerAlloc(int prio);
+FSS_API bool FSS_PlayerSetup(int handle, const void* pSeq, const void* pBnk, const void* const pWar[4]);
+FSS_API void FSS_PlayerPlay(int handle);
+FSS_API void FSS_PlayerStopEx(int handle, bool bKillChannels);
+FSS_API void FSS_PlayerSetPause(int handle, bool bPause);
+FSS_API void FSS_PlayerFree(int handle);
+
+static inline void FSS_PlayerStop(int handle)
+{
+	FSS_PlayerStopEx(handle, false);
+}
+
+static inline void FSS_PlayerKillSnd(int handle)
+{
+	FSS_PlayerStopEx(handle, true);
+}
+
+static inline void FSS_PlayerPause(int handle)
+{
+	FSS_PlayerSetPause(handle, true);
+}
+
+static inline void FSS_PlayerResume(int handle)
+{
+	FSS_PlayerSetPause(handle, false);
+}
+
+FSS_API void FSS_LockChannels(word_t mask);
+FSS_API void FSS_UnlockChannels(word_t mask);
+
+FSS_API void FSS_SetOutputFlags(int flags);
+
+FSS_API void FSS_SetupCapture(int flags, void* buffer, size_t bufSize, int timer);
+FSS_API void FSS_SetupCapReplay(int cap, int volume, int pan);
+
+FSS_API void FSS_StartCapture(int mask);
+FSS_API void FSS_StartCapReplay(int mask);
+
+FSS_API void FSS_StopCapReplay(int mask);
+FSS_API void FSS_StopCapture(int mask);
+
+FSS_API void FSS_PlayerRead(int handle, fss_plydata_t* pData);
+FSS_API void FSS_TrackRead(int handle, fss_trkdata_t* pData);
+FSS_API void FSS_ChannelRead(int handle, fss_chndata_t* pData);
+
+#ifdef __cplusplus
+}
+#endif
