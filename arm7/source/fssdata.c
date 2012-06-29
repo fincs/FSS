@@ -8,6 +8,7 @@ fss_player_t FSS_Players[FSS_PLAYERCOUNT];
 fss_track_t FSS_Tracks[FSS_MAXTRACKS];
 byte_t FSS_TrackUpdateFlags[FSS_MAXTRACKS];
 u16 FSS_ChnLockMask;
+int FSS_WorkUpdFlags;
 
 // Adapted from VGMTrans
 

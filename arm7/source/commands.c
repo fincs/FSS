@@ -144,50 +144,44 @@ void Cmd_PlayerPlay(msg_singleplayer* pArgs)
 	fifoReturn(fssFifoCh, 0);
 }
 
-void Cmd_PlayerRead(msg_ptrwithparam* pArgs)
+void Cmd_PlayerRead(fss_plydata_t* data, int param)
 {
-	fss_plydata_t* data = (fss_plydata_t*) pArgs->ptr;
-	fss_player_t* ply = FSS_Players + pArgs->param;
+	fss_player_t* ply = FSS_Players + param;
 	data->state = ply->state;
-	if (data->state != PS_NONE)
-	{
-		data->nTracks = ply->nTracks;
-		data->tempo = ply->tempo;
-		memcpy(data->trackIds, ply->trackIds, ply->nTracks);
-	}
-	fifoReturn(fssFifoCh, 0);
+	if (data->state == PS_NONE)
+		return;
+
+	data->nTracks = ply->nTracks;
+	data->tempo = ply->tempo;
+	memcpy(data->trackIds, ply->trackIds, ply->nTracks);
 }
 
-void Cmd_TrackRead(msg_ptrwithparam* pArgs)
+void Cmd_TrackRead(fss_trkdata_t* data, int param)
 {
-	fss_trkdata_t* data = (fss_trkdata_t*) pArgs->ptr;
-	fss_track_t* trk = FSS_Tracks + pArgs->param;
+	fss_track_t* trk = FSS_Tracks + param;
 	data->state = trk->state;
-	if (data->state & TS_ALLOCBIT)
-	{
-		data->number = trk->num;
-		data->playerId = trk->ply - FSS_Players;
-		data->pos = trk->pos;
-		data->patch = trk->patch;
-		data->vol = trk->vol;
-		data->expr = trk->expr;
-		data->pan = trk->pan + 64;
-	}
-	fifoReturn(fssFifoCh, 0);
+	if (!(data->state & TS_ALLOCBIT))
+		return;
+
+	data->number = trk->num;
+	data->playerId = trk->ply - FSS_Players;
+	data->pos = trk->pos;
+	data->patch = trk->patch;
+	data->vol = trk->vol;
+	data->expr = trk->expr;
+	data->pan = trk->pan + 64;
 }
 
-void Cmd_ChannelRead(msg_ptrwithparam* pArgs)
+void Cmd_ChannelRead(fss_chndata_t* data, int param)
 {
-	fss_chndata_t* data = (fss_chndata_t*) pArgs->ptr;
-	fss_channel_t* chn = FSS_Channels + pArgs->param;
+	fss_channel_t* chn = FSS_Channels + param;
 	data->state = chn->state;
-	if (data->state != CS_NONE)
-	{
-		data->trackId = chn->trackId;
-		data->pan = chn->pan + 64;
-		data->key = chn->key;
-		data->vol = FSS_ChnVol[pArgs->param];
-		data->patch = chn->patch;
-	}
-	fifoReturn(fssFifoCh, 0);
+	if (data->state == CS_NONE)
+		return;
+
+	data->trackId = chn->trackId;
+	data->pan = chn->pan + 64;
+	data->key = chn->key;
+	data->vol = FSS_ChnVol[param];
+	data->patch = chn->patch;
 }

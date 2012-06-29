@@ -49,6 +49,9 @@ void Cmd_PlayerAlloc(msg_playeralloc* pArgs);
 void Cmd_PlayerSetup(msg_playersetup* pArgs);
 void Cmd_PlayerPlay(msg_singleplayer* pArgs);
 
-void Cmd_PlayerRead(msg_ptrwithparam* pArgs);
-void Cmd_TrackRead(msg_ptrwithparam* pArgs);
-void Cmd_ChannelRead(msg_ptrwithparam* pArgs);
+void Cmd_PlayerRead(fss_plydata_t* data, int param);
+void Cmd_TrackRead(fss_trkdata_t* data, int param);
+void Cmd_ChannelRead(fss_chndata_t* data, int param);
+
+enum { WUF_PLAYERS = BIT(0), WUF_TRACKS = BIT(1), WUF_CHANNELS = BIT(2) };
+extern int FSS_WorkUpdFlags;

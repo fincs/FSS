@@ -33,7 +33,7 @@ enum
 	FSSFIFO_LOCKCHANNELS, FSSFIFO_SETOUTPFLAGS, FSSFIFO_CAPSETUP, FSSFIFO_CAPREPLAYSETUP,
 	FSSFIFO_CAPSTART, FSSFIFO_CAPREPLAYSTART, FSSFIFO_CAPSTOP, FSSFIFO_CAPREPLAYSTOP,
 
-	FSSFIFO_PLAYERREAD, FSSFIFO_TRACKREAD, FSSFIFO_CHANNELREAD
+	FSSFIFO_SETUPDFLAGS
 };
 
 #ifdef ARM7
@@ -159,13 +159,9 @@ typedef struct
 
 typedef struct
 {
-	msg_ptrwithparam msg;
-	union
-	{
-		fss_chndata_t chnData;
-		fss_trkdata_t trkData;
-		fss_plydata_t plyData;
-	};
+	fss_chndata_t chnData[16];
+	fss_trkdata_t trkData[FSS_TRACKCOUNT];
+	fss_plydata_t plyData[FSS_PLAYERCOUNT];
 	s16 globalVars[FSS_GLOBALVARCOUNT];
 	s16 playerVars[FSS_PLAYERCOUNT][FSS_PLAYERVARCOUNT];
 } fss_sharedwork_t;

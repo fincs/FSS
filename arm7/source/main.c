@@ -114,6 +114,10 @@ void fssDatamsgHandler(int nBytes, void* user_data)
 			Cap_StopReplay(((msg_generic*) rBuf)->which);
 			fifoReturn(fssFifoCh, 0);
 			break;
+		case FSSFIFO_SETUPDFLAGS:
+			FSS_WorkUpdFlags = ((msg_generic*) rBuf)->which;
+			fifoReturn(fssFifoCh, 0);
+			break;
 	}
 }
 
@@ -121,14 +125,6 @@ void fssAddressHandler(void* rBuf, void* user_data)
 {
 	switch (*(int*)rBuf)
 	{
-		case FSSFIFO_PLAYERREAD:
-			Cmd_PlayerRead((msg_ptrwithparam*) rBuf);
-			break;
-		case FSSFIFO_TRACKREAD:
-			Cmd_TrackRead((msg_ptrwithparam*) rBuf);
-			break;
-		case FSSFIFO_CHANNELREAD:
-			Cmd_ChannelRead((msg_ptrwithparam*) rBuf);
-			break;
+		// Empty...
 	}
 }

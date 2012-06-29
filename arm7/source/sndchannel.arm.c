@@ -85,6 +85,7 @@ void Snd_SetOutputFlags(int flags)
 }
 
 static void Snd_UpdChannel(fss_channel_t* pCh, int nCh);
+static void Snd_UpdWorkData();
 
 void Snd_Timer()
 {
@@ -102,6 +103,7 @@ void Snd_Timer()
 		Player_Run(i);
 
 	Chn_UpdateTracks();
+	Snd_UpdWorkData();
 
 	//leaveCriticalSection(cS);
 }
@@ -114,6 +116,20 @@ static int calcVolDivShift(int x)
 	// VOLDIV(3) /16 >>4
 	if (x < 3) return x;
 	return 4;
+}
+
+void Snd_UpdWorkData()
+{
+	register int i;
+	if (FSS_WorkUpdFlags & WUF_CHANNELS)
+		for (i = 0; i < 16; i ++)
+			Cmd_ChannelRead((fss_chndata_t*)&FSS_SharedWork->chnData[i], i);
+	if (FSS_WorkUpdFlags & WUF_TRACKS)
+		for (i = 0; i < FSS_TRACKCOUNT; i ++)
+			Cmd_TrackRead((fss_trkdata_t*)&FSS_SharedWork->trkData[i], i);
+	if (FSS_WorkUpdFlags & WUF_PLAYERS)
+		for (i = 0; i < FSS_PLAYERCOUNT; i ++)
+			Cmd_PlayerRead((fss_plydata_t*)&FSS_SharedWork->plyData[i], i);
 }
 
 void Snd_UpdChannel(fss_channel_t* pCh, int nCh)

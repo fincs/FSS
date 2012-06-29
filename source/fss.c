@@ -12,7 +12,6 @@ FEOSINIT void initSharedWork()
 {
 	DC_FlushRange(__sharedworkBuf, sizeof(__sharedworkBuf));
 	sharedWork = (volatile fss_sharedwork_t*) memUncached(__sharedworkBuf);
-	sharedWork->msg.ptr = (void*)&sharedWork->chnData;
 }
 
 static inline int _callARM7(int x, u8* y)
@@ -304,64 +303,26 @@ void FSS_StopCapture(int mask)
 	CALL_ARM7();
 }
 
-/*
+void FSS_SetUpdFlags(int flags)
+{
+	msg_generic msg;
+	msg.msgtype = FSSFIFO_SETUPDFLAGS;
+	msg.which = flags;
+
+	CALL_ARM7();
+}
+
 void FSS_PlayerRead(int handle, fss_plydata_t* pData)
 {
-	msg_ptrwithparam msg;
-	msg.msgtype = FSSFIFO_PLAYERREAD;
-	msg.ptr = pData;
-	msg.param = handle;
-
-	DC_FlushRange(pData, sizeof(fss_plydata_t));
-	CALL_ARM7();
+	memcpy(pData, (void*)&sharedWork->plyData[handle], sizeof(fss_plydata_t));
 }
 
 void FSS_TrackRead(int handle, fss_trkdata_t* pData)
 {
-	msg_ptrwithparam msg;
-	msg.msgtype = FSSFIFO_TRACKREAD;
-	msg.ptr = pData;
-	msg.param = handle;
-
-	DC_FlushRange(pData, sizeof(fss_trkdata_t));
-	CALL_ARM7();
+	memcpy(pData, (void*)&sharedWork->trkData[handle], sizeof(fss_trkdata_t));
 }
 
 void FSS_ChannelRead(int handle, fss_chndata_t* pData)
 {
-	msg_ptrwithparam msg;
-	msg.msgtype = FSSFIFO_CHANNELREAD;
-	msg.ptr = pData;
-	msg.param = handle;
-
-	DC_FlushRange(pData, sizeof(fss_chndata_t));
-	CALL_ARM7();
-}
-*/
-
-void FSS_PlayerRead(int handle, fss_plydata_t* pData)
-{
-	sharedWork->msg.msgtype = FSSFIFO_PLAYERREAD;
-	sharedWork->msg.param = handle;
-	CALL_ARM7_ADDR();
-
-	memcpy(pData, (void*)&sharedWork->plyData, sizeof(fss_plydata_t));
-}
-
-void FSS_TrackRead(int handle, fss_trkdata_t* pData)
-{
-	sharedWork->msg.msgtype = FSSFIFO_TRACKREAD;
-	sharedWork->msg.param = handle;
-	CALL_ARM7_ADDR();
-
-	memcpy(pData, (void*)&sharedWork->trkData, sizeof(fss_trkdata_t));
-}
-
-void FSS_ChannelRead(int handle, fss_chndata_t* pData)
-{
-	sharedWork->msg.msgtype = FSSFIFO_CHANNELREAD;
-	sharedWork->msg.param = handle;
-	CALL_ARM7_ADDR();
-
-	memcpy(pData, (void*)&sharedWork->chnData, sizeof(fss_chndata_t));
+	memcpy(pData, (void*)&sharedWork->chnData[handle], sizeof(fss_chndata_t));
 }

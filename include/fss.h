@@ -58,6 +58,13 @@ enum
 	CapStatus_Disabled = 0,
 };
 
+enum
+{
+	UpdFlags_Players = BIT(0),
+	UpdFlags_Tracks = BIT(1),
+	UpdFlags_Channels = BIT(2)
+};
+
 typedef struct
 {
 	const void* data;
@@ -139,6 +146,7 @@ FSS_API void FSS_StartCapReplay(int mask);
 FSS_API void FSS_StopCapReplay(int mask);
 FSS_API void FSS_StopCapture(int mask);
 
+FSS_API void FSS_SetUpdFlags(int flags);
 FSS_API void FSS_PlayerRead(int handle, fss_plydata_t* pData);
 FSS_API void FSS_TrackRead(int handle, fss_trkdata_t* pData);
 FSS_API void FSS_ChannelRead(int handle, fss_chndata_t* pData);
