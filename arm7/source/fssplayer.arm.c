@@ -351,8 +351,8 @@ static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
 static inline int CalcNoteLen(fss_player_t* ply, int len)
 {
 	int realTempo = ((int)ply->tempo * (int)ply->tempoRate) >> 8;
-	return (len*240 + realTempo - 1) / realTempo;
-	//return (3*(len*240 + realTempo - 1) / realTempo) / 4;
+	//return (len*240 + realTempo - 1) / realTempo;
+	return (len*240) / realTempo;
 }
 
 static int Note_On(int trkNo, int key, int vel, int len)
@@ -662,7 +662,6 @@ void Track_Run(int handle)
 				int i;
 				for (i = 0; i < ply->nTracks; i ++)
 					Track_UpdateNoteLens(*tIds++, oldTempo, newTempo);
-				//*pData += 2;
 				break;
 			}
 
