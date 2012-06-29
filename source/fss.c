@@ -157,14 +157,17 @@ int FSS_PlayerAlloc(int prio)
 	return CALL_ARM7();
 }
 
-bool FSS_PlayerSetup(int handle, const void* pSeq, const void* pBnk, const void* const pWar[4])
+bool FSS_PlayerSetup(int handle, const void* pSeq, const void* pBnk)
 {
 	msg_playersetup msg;
 	msg.msgtype = FSSFIFO_PLAYERSETUP;
 	msg.playerId = handle;
 	msg.pSeq = (const byte_t*) pSeq;
 	msg.pBnk = (const byte_t*) pBnk;
-	memcpy(msg.pWar, pWar, sizeof(msg.pWar));
+	msg.pWar[0] = (const byte_t*) FSS_GetBankWar(pBnk, 0);
+	msg.pWar[1] = (const byte_t*) FSS_GetBankWar(pBnk, 1);
+	msg.pWar[2] = (const byte_t*) FSS_GetBankWar(pBnk, 2);
+	msg.pWar[3] = (const byte_t*) FSS_GetBankWar(pBnk, 3);
 
 	return CALL_ARM7();
 }

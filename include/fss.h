@@ -73,6 +73,23 @@ typedef struct
 	hword_t format;
 } fss_sample_t;
 
+static inline const void** __SBNK_GetWavLinkEntryPtr(const void* pBnk, int id)
+{
+	return (const void**)((char*)pBnk + 24 + id*sizeof(void*));
+}
+
+static inline void FSS_SetBankWar(const void* pBnk, int warId, const void* pWar)
+{
+	const void** pEnt = __SBNK_GetWavLinkEntryPtr(pBnk, warId);
+	*pEnt = pWar;
+}
+
+static inline const void* FSS_GetBankWar(const void* pBnk, int warId)
+{
+	const void** pEnt = __SBNK_GetWavLinkEntryPtr(pBnk, warId);
+	return *pEnt;
+}
+
 #include "fssdata.h"
 
 FSS_API int FSS_PlaySample(fss_sample_t* pSample, int timer, int volume, int pan, int prio);
@@ -106,7 +123,7 @@ static inline void FSS_ChnSetDuty(int handle, int duty)
 }
 
 FSS_API int FSS_PlayerAlloc(int prio);
-FSS_API bool FSS_PlayerSetup(int handle, const void* pSeq, const void* pBnk, const void* const pWar[4]);
+FSS_API bool FSS_PlayerSetup(int handle, const void* pSeq, const void* pBnk);
 FSS_API void FSS_PlayerPlay(int handle);
 FSS_API void FSS_PlayerStopEx(int handle, bool bKillChannels);
 FSS_API void FSS_PlayerSetPause(int handle, bool bPause);
