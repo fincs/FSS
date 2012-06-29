@@ -1,5 +1,6 @@
 #include "fss7.h"
 
+volatile fss_sharedwork_t* FSS_SharedWork;
 fss_channel_t FSS_Channels[16];
 u16 FSS_ChnVol[16];
 int FSS_NoteLengths[16];

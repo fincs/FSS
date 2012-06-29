@@ -1,5 +1,13 @@
 #pragma once
 
+#define FSS_PLAYERCOUNT 16
+#define FSS_TRACKCOUNT 16
+#define FSS_MAXTRACKS 32
+#define FSS_PLAYERVARCOUNT 16
+#define FSS_GLOBALVARCOUNT 16
+#define FSS_DEFAULTVARVALUE -1
+#define FSS_TRACKSTACKSIZE 3
+
 typedef struct
 {
 	byte_t state;

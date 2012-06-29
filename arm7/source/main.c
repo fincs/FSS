@@ -28,6 +28,10 @@ void fssDatamsgHandler(int nBytes, void* user_data)
 
 	switch (rBuf[0])
 	{
+		case FSSFIFO_INIT:
+			FSS_SharedWork = ((msg_init*)rBuf)->sharedWork;
+			fifoReturn(fssFifoCh, 0);
+			break;
 		case FSSFIFO_PLAYSMP:
 			Cmd_PlaySmp((msg_playsmp*) rBuf);
 			break;

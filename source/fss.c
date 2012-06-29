@@ -6,13 +6,13 @@ static instance_t fssArm7Handle;
 
 // The funny 32-byte stuff is because it's the size of a cache line
 __attribute__((aligned(32))) static byte_t __sharedworkBuf[FSS_SHAREDWORKSIZE];
-static fss_sharedwork_t* sharedWork;
+static volatile fss_sharedwork_t* sharedWork;
 
 FEOSINIT void initSharedWork()
 {
 	DC_FlushRange(__sharedworkBuf, sizeof(__sharedworkBuf));
-	sharedWork = (fss_sharedwork_t*) memUncached(__sharedworkBuf);
-	sharedWork->msg.ptr = &sharedWork->chnData;
+	sharedWork = (volatile fss_sharedwork_t*) memUncached(__sharedworkBuf);
+	sharedWork->msg.ptr = (void*)&sharedWork->chnData;
 }
 
 static inline int _callARM7(int x, u8* y)
@@ -29,7 +29,7 @@ static inline int _callARM7_addr(void* addr)
 	return (int) fifoGetRetValue(fssFifoCh);
 }
 
-#define CALL_ARM7_ADDR() _callARM7_addr(sharedWork)
+#define CALL_ARM7_ADDR() _callARM7_addr((void*)sharedWork)
 
 bool FSS_Startup()
 {
@@ -42,6 +42,23 @@ bool FSS_Startup()
 		fssRefCount--;
 		return false;
 	}
+
+	{
+		int i, j;
+		for (i = 0; i < FSS_GLOBALVARCOUNT; i ++)
+			sharedWork->globalVars[i] = FSS_DEFAULTVARVALUE;
+		for (i = 0; i < FSS_PLAYERCOUNT; i ++)
+			for (j = 0; j < FSS_PLAYERVARCOUNT; j ++)
+				sharedWork->playerVars[i][j] = FSS_DEFAULTVARVALUE;
+	}
+
+	{
+		msg_init msg;
+		msg.msgtype = FSSFIFO_INIT;
+		msg.sharedWork = sharedWork;
+		CALL_ARM7();
+	}
+
 	return true;
 }
 
@@ -328,7 +345,7 @@ void FSS_PlayerRead(int handle, fss_plydata_t* pData)
 	sharedWork->msg.param = handle;
 	CALL_ARM7_ADDR();
 
-	memcpy(pData, &sharedWork->plyData, sizeof(fss_plydata_t));
+	memcpy(pData, (void*)&sharedWork->plyData, sizeof(fss_plydata_t));
 }
 
 void FSS_TrackRead(int handle, fss_trkdata_t* pData)
@@ -337,7 +354,7 @@ void FSS_TrackRead(int handle, fss_trkdata_t* pData)
 	sharedWork->msg.param = handle;
 	CALL_ARM7_ADDR();
 
-	memcpy(pData, &sharedWork->trkData, sizeof(fss_trkdata_t));
+	memcpy(pData, (void*)&sharedWork->trkData, sizeof(fss_trkdata_t));
 }
 
 void FSS_ChannelRead(int handle, fss_chndata_t* pData)
@@ -346,5 +363,5 @@ void FSS_ChannelRead(int handle, fss_chndata_t* pData)
 	sharedWork->msg.param = handle;
 	CALL_ARM7_ADDR();
 
-	memcpy(pData, &sharedWork->chnData, sizeof(fss_chndata_t));
+	memcpy(pData, (void*)&sharedWork->chnData, sizeof(fss_chndata_t));
 }

@@ -7,13 +7,23 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "fsstypes.h"
+#ifdef ARM7
+typedef u8 byte_t;
+typedef u16 hword_t;
+typedef u32 word_t;
+typedef s8 char_t;
+typedef s16 short_t;
+typedef s32 long_t;
+#endif
+
 #include "../include/fssdata.h"
 
 extern int fssFifoCh;
 
 enum
 {
+	FSSFIFO_INIT,
+
 	FSSFIFO_PLAYSMP, FSSFIFO_PLAYPSG, FSSFIFO_PLAYNOISE,
 	FSSFIFO_CHNISACTIVE, FSSFIFO_CHNSTOP, FSSFIFO_CHNSETPARAM,
 
@@ -156,6 +166,14 @@ typedef struct
 		fss_trkdata_t trkData;
 		fss_plydata_t plyData;
 	};
+	s16 globalVars[FSS_GLOBALVARCOUNT];
+	s16 playerVars[FSS_PLAYERCOUNT][FSS_PLAYERVARCOUNT];
 } fss_sharedwork_t;
 
 #define FSS_SHAREDWORKSIZE ((sizeof(fss_sharedwork_t) + 31) &~ 31)
+
+typedef struct
+{
+	int msgtype;
+	volatile fss_sharedwork_t* sharedWork;
+} msg_init;
