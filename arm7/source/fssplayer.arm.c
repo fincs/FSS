@@ -116,6 +116,7 @@ static int readvl(const u8** ppData)
 
 static void Track_ClearState(fss_track_t* trk)
 {
+	trk->state = TS_ALLOCBIT;
 	trk->prio &= ~0xFF;
 	trk->prio |= 64;
 	trk->pos = trk->startPos;
