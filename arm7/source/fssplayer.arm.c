@@ -123,7 +123,7 @@ static void Track_ClearState(fss_track_t* trk)
 	trk->stackPos = 0;
 	trk->wait = 0;
 	trk->patch = 0;
-	trk->portaKey = 0;
+	trk->portaKey = 60;
 	trk->portaTime = 0;
 	trk->sweepPitch = 0;
 	trk->vol = 64;
