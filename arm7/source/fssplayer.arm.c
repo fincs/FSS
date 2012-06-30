@@ -117,8 +117,7 @@ static int readvl(const u8** ppData)
 static void Track_ClearState(fss_track_t* trk)
 {
 	trk->state = TS_ALLOCBIT;
-	trk->prio &= ~0xFF;
-	trk->prio |= 64;
+	trk->prio = trk->ply->prio + 64;
 	trk->pos = trk->startPos;
 	trk->stackPos = 0;
 	trk->wait = 0;
@@ -139,11 +138,10 @@ static void Track_ClearState(fss_track_t* trk)
 	trk->modDepth = 0;
 }
 
-static void Player_InitTrack(int handle, fss_player_t* ply, const byte_t* pos, int n, int prio)
+static void Player_InitTrack(int handle, fss_player_t* ply, const byte_t* pos, int n)
 {
 	fss_track_t* trk = FSS_Tracks + handle;
 	trk->num = n;
-	trk->prio = prio;
 	trk->ply = ply;
 	trk->startPos = pos;
 	Track_ClearState(trk);
@@ -190,11 +188,10 @@ bool Player_Setup(int handle, const byte_t* pSeq, const byte_t* pBnk, const byte
 	memcpy(ply->pWar, pWar, sizeof(ply->pWar));
 
 	byte_t* tArray = ply->trackIds;
-	const int prio = (int)ply->prio << 8;
 	
-	int firstTrack = Track_Alloc(prio);
+	int firstTrack = Track_Alloc();
 	if (firstTrack == -1) return false;
-	Player_InitTrack(firstTrack, ply, NULL, 0, prio);
+	Player_InitTrack(firstTrack, ply, NULL, 0);
 
 	int nTracks = 1;
 	tArray[0] = firstTrack;
@@ -208,7 +205,7 @@ bool Player_Setup(int handle, const byte_t* pSeq, const byte_t* pBnk, const byte
 		const byte_t* pos = ply->pSeqData + read24(&pData);
 		int newTrack = Track_Alloc();
 		if (!newTrack) continue;
-		Player_InitTrack(newTrack, ply, pos, tNum, prio);
+		Player_InitTrack(newTrack, ply, pos, tNum);
 		tArray[nTracks++] = newTrack;
 	}
 
@@ -613,8 +610,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_PRIO:
 			{
-				trk->prio &= ~0xFF;
-				trk->prio |= read8(pData);
+				trk->prio = trk->ply->prio + read8(pData);
 				// Update here?
 				break;
 			}

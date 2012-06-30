@@ -2,7 +2,6 @@
 
 static inline u32 cnvType(int x) { return (x & 3) << 29; }
 static inline u32 cnvLoop(int x) { return (x & FMT_LOOP) ? SOUND_REPEAT : SOUND_ONE_SHOT; }
-static inline u16 cnvPrio(int x) { return (x << 8) | 0x80; }
 
 static void PrepareCh(fss_channel_t* pCh, int nCh)
 {
@@ -28,7 +27,7 @@ static void PrepareCh(fss_channel_t* pCh, int nCh)
 
 void Cmd_PlaySmp(msg_playsmp* pArgs)
 {
-	int prio = cnvPrio(pArgs->prio);
+	int prio = pArgs->prio;
 	int nCh = Chn_Alloc(TYPE_PCM, prio);
 	if (nCh == -1) fifoReturn(fssFifoCh, -1);
 
@@ -51,7 +50,7 @@ void Cmd_PlaySmp(msg_playsmp* pArgs)
 
 void Cmd_PlayPsg(msg_playpsg* pArgs)
 {
-	int prio = cnvPrio(pArgs->prio);
+	int prio = pArgs->prio;
 	int nCh = Chn_Alloc(TYPE_PSG, prio);
 	if (nCh == -1) fifoReturn(fssFifoCh, -1);
 
@@ -71,7 +70,7 @@ void Cmd_PlayPsg(msg_playpsg* pArgs)
 
 void Cmd_PlayNoise(msg_playnoise* pArgs)
 {
-	int prio = cnvPrio(pArgs->prio);
+	int prio = pArgs->prio;
 	int nCh = Chn_Alloc(TYPE_NOISE, prio);
 	if (nCh == -1) fifoReturn(fssFifoCh, -1);
 

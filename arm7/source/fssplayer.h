@@ -18,8 +18,7 @@ typedef struct
 
 typedef struct
 {
-	byte_t state, num;
-	hword_t prio;
+	byte_t state, num, prio, _pad;
 	fss_player_t* ply;
 
 	const u8* startPos;
@@ -78,7 +77,8 @@ typedef struct
 	sndreg_t reg;
 	byte_t state;
 	char_t trackId; // -1 = none
-	hword_t prio;
+	byte_t prio;
+	byte_t _pad;
 
 	u8 flags;
 	s8 pan; // -64 .. 63
