@@ -141,10 +141,6 @@ void Snd_UpdChannel(fss_channel_t* pCh, int nCh)
 		return;
 	}
 
-	if (FSS_NoteLengths[nCh] != -1)
-		if (!--FSS_NoteLengths[nCh])
-			Chn_Release(pCh, nCh);
-
 	u8* pFlag = &pCh->flags;
 	const bool bNotInSustain = pCh->state != CS_SUSTAIN;
 	const bool bInStart = pCh->state == CS_START;

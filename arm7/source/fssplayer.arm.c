@@ -324,6 +324,12 @@ static inline void Chn_UpdateMod(fss_channel_t* chn, fss_track_t* trk)
 	chn->modDelay = trk->modDelay;
 }
 
+static inline int CalcNoteLen(fss_player_t* ply, int len)
+{
+	int realTempo = ((int)ply->tempo * (int)ply->tempoRate) >> 8;
+	return (len*240 + realTempo - 1) / realTempo;
+}
+
 static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
 {
 	chn->sweepPitch = trk->sweepPitch;
@@ -338,7 +344,7 @@ static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
 	chn->sweepPitch += diff >> 16;
 
 	if (trk->portaTime == 0)
-		chn->sweepLen = FSS_NoteLengths[chn - FSS_Channels] - 1;
+		chn->sweepLen = CalcNoteLen(trk->ply, FSS_NoteLengths[chn - FSS_Channels]);
 	else
 	{
 		u32 sq_time = (u32)trk->portaTime * (u32)trk->portaTime;
@@ -348,13 +354,6 @@ static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
 	}
 }
 
-static inline int CalcNoteLen(fss_player_t* ply, int len)
-{
-	int realTempo = ((int)ply->tempo * (int)ply->tempoRate) >> 8;
-	//return (len*240 + realTempo - 1) / realTempo;
-	return (len*240) / realTempo;
-}
-
 static int Note_On(int trkNo, int key, int vel, int len)
 {
 	fss_track_t* trk = FSS_Tracks + trkNo;
@@ -362,9 +361,6 @@ static int Note_On(int trkNo, int key, int vel, int len)
 
 	bool bIsPCM = true;
 	const u8* pBnk = ply->pBnk;
-
-	len = CalcNoteLen(ply, len);
-	if (!len) return -1;
 	
 	fss_channel_t* chn;
 	int nCh;
@@ -445,7 +441,7 @@ _ReadRecord:
 	chn->pan = (int)pNoteDef->pan - 64;
 	chn->modDelayCnt = 0;
 	chn->modCounter = 0;
-	FSS_NoteLengths[nCh] = len + 1;
+	FSS_NoteLengths[nCh] = len;
 
 	chn->attackLvl = Cnv_Attack(pNoteDef->a);
 	chn->decayRate = Cnv_Fall(pNoteDef->d);
@@ -514,25 +510,20 @@ void Chn_UpdateTracks()
 	memset(FSS_TrackUpdateFlags, 0, sizeof(FSS_TrackUpdateFlags));
 }
 
-void Track_UpdateNoteLens(int trkId, int oldTempo, int newTempo)
+void Track_UpdLengths(int handle)
 {
 	register int i;
 	for (i = 0; i < 16; i ++)
 	{
 		fss_channel_t* chn = FSS_Channels + i;
-		if (chn->state == CS_NONE || chn->state != trkId)
-			continue;
-		if (FSS_NoteLengths[i] == -1)
-			continue;
-
-		int newLen = (oldTempo * FSS_NoteLengths[i]) / newTempo;
-		if (newLen == 0) newLen = 1;
-		FSS_NoteLengths[i] = newLen;
+		if (chn->state > CS_NONE && chn->trackId == handle && chn->state != CS_RELEASE && !--FSS_NoteLengths[i])
+			Chn_Release(chn, i);
 	}
 }
 
 void Track_Run(int handle)
 {
+	Track_UpdLengths(handle);
 	fss_track_t* trk = FSS_Tracks + handle;
 	if (trk->state & TS_END) return;
 
@@ -651,17 +642,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_TEMPO:
 			{
-				fss_player_t* ply = trk->ply;
-				int oldTempo = ply->tempo;
-				int newTempo = read16(pData);
-				if (oldTempo == newTempo)
-					break;
-				trk->ply->tempo = newTempo;
-				//trk->ply->tempoCount = 0;
-				u8* tIds = ply->trackIds;
-				int i;
-				for (i = 0; i < ply->nTracks; i ++)
-					Track_UpdateNoteLens(*tIds++, oldTempo, newTempo);
+				trk->ply->tempo = read16(pData);
 				break;
 			}
 
