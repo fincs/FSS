@@ -42,6 +42,7 @@ void Player_SetPause(int handle, bool bPause);
 
 int Track_Alloc();
 void Track_Free(int handle);
+void Track_ReleaseAllNotes(int handle);
 
 void Chn_UpdateTracks();
 

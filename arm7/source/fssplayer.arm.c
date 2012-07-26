@@ -250,7 +250,7 @@ void Player_Stop(int handle, bool bKillSound)
 
 void Player_SetPause(int handle, bool bPause)
 {
-	register int i, j;
+	register int i;
 	fss_player_t* ply = FSS_Players + handle;
 
 	if (ply->state == PS_PAUSE && !bPause)
@@ -259,15 +259,7 @@ void Player_SetPause(int handle, bool bPause)
 	{
 		ply->state = PS_PAUSE;
 		for (i = 0; i < ply->nTracks; i ++)
-		{
-			int trackId = ply->trackIds[i];
-			for (j = 0; j < 16; j ++)
-			{
-				fss_channel_t* chn = FSS_Channels + j;
-				if (chn->state != CS_NONE && chn->trackId == trackId)
-					Chn_Release(chn, j);
-			}
-		}
+			Track_ReleaseAllNotes(ply->trackIds[i]);
 	}
 }
 
@@ -344,14 +336,14 @@ static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
 		chn->sweepLen = CalcNoteLen(trk->ply, FSS_NoteLengths[chn - FSS_Channels]);
 	else
 	{
-		u32 sq_time = (u32)trk->portaTime * (u32)trk->portaTime;
+		int sq_time = (u32)trk->portaTime * (u32)trk->portaTime;
 		int abs_sp = chn->sweepPitch;
 		abs_sp = abs_sp < 0 ? -abs_sp : abs_sp;
-		chn->sweepLen = ((u32)abs_sp*sq_time) >> 11;
+		chn->sweepLen = (abs_sp*sq_time) >> 11;
 	}
 }
 
-static int Note_On(int trkNo, int key, int vel, int len)
+int Note_On(int trkNo, int key, int vel, int len)
 {
 	fss_track_t* trk = FSS_Tracks + trkNo;
 	fss_player_t* ply = trk->ply;
@@ -456,6 +448,40 @@ _ReadRecord:
 	return nCh;
 }
 
+int Note_On_Tie(int trkNo, int key, int vel)
+{
+	// Find an existing note
+	register int i;
+	fss_channel_t* chn;
+	for (i = 0; i < 16; i ++)
+	{
+		chn = FSS_Channels + i;
+		if (chn->state > CS_NONE && chn->trackId == trkNo && chn->state != CS_RELEASE)
+			break;
+	}
+
+	if (i == 16)
+		// Can't find note -> create an endless one
+		return Note_On(trkNo, key, vel, -1);
+
+	chn->flags = 0;
+	chn->prio = FSS_Tracks[trkNo].prio;
+	chn->key = key;
+	chn->velocity = Cnv_Vol(vel);
+	chn->modDelayCnt = 0;
+	chn->modCounter = 0;
+
+	fss_track_t* trk = FSS_Tracks + trkNo;
+	Chn_UpdateVol(chn, trk);
+	//Chn_UpdatePan(chn, trk);
+	Chn_UpdateTune(chn, trk);
+	Chn_UpdateMod(chn, trk);
+	Chn_UpdatePorta(chn, trk);
+
+	trk->portaKey = key;
+	return i;
+}
+
 static inline int getModFlag(int type)
 {
 	switch(type)
@@ -507,7 +533,7 @@ void Chn_UpdateTracks()
 	memset(FSS_TrackUpdateFlags, 0, sizeof(FSS_TrackUpdateFlags));
 }
 
-void Track_UpdLengths(int handle)
+void Track_UpdNoteLengths(int handle)
 {
 	register int i;
 	for (i = 0; i < 16; i ++)
@@ -518,9 +544,20 @@ void Track_UpdLengths(int handle)
 	}
 }
 
+void Track_ReleaseAllNotes(int handle)
+{
+	register int i;
+	for (i = 0; i < 16; i ++)
+	{
+		fss_channel_t* chn = FSS_Channels + i;
+		if (chn->state > CS_NONE && chn->trackId == handle && chn->state != CS_RELEASE)
+			Chn_Release(chn, i);
+	}
+}
+
 void Track_Run(int handle)
 {
-	Track_UpdLengths(handle);
+	Track_UpdNoteLengths(handle);
 	fss_track_t* trk = FSS_Tracks + handle;
 	if (trk->state & TS_END) return;
 
@@ -542,7 +579,10 @@ void Track_Run(int handle)
 			int vel = read8(pData);
 			int len = readvl(pData);
 			if (trk->state & TS_NOTEWAIT) trk->wait = len;
-			Note_On(handle, key, vel, len);
+			if (!(trk->state & TS_TIEBIT))
+				Note_On(handle, key, vel, len);
+			else
+				Note_On_Tie(handle, key, vel);
 		}else switch(cmd)
 		{
 			//-----------------------------------------------------------------
@@ -622,9 +662,11 @@ void Track_Run(int handle)
 				break;
 			}
 
-			case SSEQ_CMD_TIE: // TODO: obey
+			case SSEQ_CMD_TIE:
 			{
-				*pData += 1;
+				trk->state &= ~TS_TIEBIT;
+				trk->state |= read8(pData) ? TS_TIEBIT : 0;
+				Track_ReleaseAllNotes(handle);
 				break;
 			}
 
