@@ -17,6 +17,7 @@ enum { SoundFormat_8Bit, SoundFormat_16Bit, SoundFormat_ADPCM, SoundFormat_Loop 
 enum { DutyCycle_0 = 7, DutyCycle_12 = 0, DutyCycle_25, DutyCycle_37, DutyCycle_50, DutyCycle_62, DutyCycle_75, DutyCycle_87 };
 #define SOUND_TIMER(n) (0x1000000/((int)(n)))
 #define CAP_TIMER(n) SOUND_TIMER(n)
+#define MIC_TIMER(n) (SOUND_TIMER(n)<<1)
 #define TONE_TIMER(n) SOUND_TIMER((n)*8)
 #define INVALID_SND_HANDLE (-1)
 #define DEFAULT_PRIO 0x80
@@ -167,6 +168,10 @@ FSS_API void FSS_SetUpdFlags(int flags);
 FSS_API void FSS_PlayerRead(int handle, fss_plydata_t* pData);
 FSS_API void FSS_TrackRead(int handle, fss_trkdata_t* pData);
 FSS_API void FSS_ChannelRead(int handle, fss_chndata_t* pData);
+
+FSS_API void FSS_MicStart(void* buffer, int sampCount, int format, int timer);
+FSS_API void FSS_MicStop();
+FSS_API int FSS_MicGetPos();
 
 #ifdef __cplusplus
 }

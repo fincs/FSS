@@ -33,7 +33,9 @@ enum
 	FSSFIFO_LOCKCHANNELS, FSSFIFO_SETOUTPFLAGS, FSSFIFO_CAPSETUP, FSSFIFO_CAPREPLAYSETUP,
 	FSSFIFO_CAPSTART, FSSFIFO_CAPREPLAYSTART, FSSFIFO_CAPSTOP, FSSFIFO_CAPREPLAYSTOP,
 
-	FSSFIFO_SETUPDFLAGS
+	FSSFIFO_SETUPDFLAGS,
+
+	FSSFIFO_MICSTART, FSSFIFO_MICGETPOS, FSSFIFO_MICSTOP
 };
 
 #ifdef ARM7
@@ -173,3 +175,11 @@ typedef struct
 	int msgtype;
 	volatile fss_sharedwork_t* sharedWork;
 } msg_init;
+
+typedef struct
+{
+	int msgtype;
+	u16 timer, fmt;
+	void* buffer;
+	int length;
+} msg_micstart;

@@ -56,3 +56,7 @@ void Cmd_ChannelRead(fss_chndata_t* data, int param);
 
 enum { WUF_PLAYERS = BIT(0), WUF_TRACKS = BIT(1), WUF_CHANNELS = BIT(2) };
 extern int FSS_WorkUpdFlags;
+
+void Cmd_MicStart(msg_micstart* data);
+void Cmd_MicGetPos();
+void Cmd_MicStop();

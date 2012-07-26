@@ -329,3 +329,33 @@ void FSS_ChannelRead(int handle, fss_chndata_t* pData)
 {
 	memcpy(pData, (void*)&sharedWork->chnData[handle], sizeof(fss_chndata_t));
 }
+
+void FSS_MicStart(void* buffer, int sampCount, int format, int timer)
+{
+	msg_micstart msg;
+	msg.msgtype = FSSFIFO_MICSTART;
+	msg.timer = timer;
+	msg.fmt = format;
+	msg.buffer = buffer;
+	msg.length = sampCount;
+
+	if (format & SoundFormat_16Bit) sampCount <<= 1;
+	DC_FlushRange(buffer, sampCount);
+
+	CALL_ARM7();
+}
+
+void FSS_MicStop()
+{
+	int msg = FSSFIFO_MICSTOP;
+
+	CALL_ARM7();
+}
+
+int FSS_MicGetPos()
+{
+	int msg = FSSFIFO_MICGETPOS;
+
+	return CALL_ARM7();
+}
+

@@ -118,6 +118,15 @@ void fssDatamsgHandler(int nBytes, void* user_data)
 			FSS_WorkUpdFlags = ((msg_generic*) rBuf)->which;
 			fifoReturn(fssFifoCh, 0);
 			break;
+		case FSSFIFO_MICSTART:
+			Cmd_MicStart((msg_micstart*) rBuf);
+			break;
+		case FSSFIFO_MICGETPOS:
+			Cmd_MicGetPos();
+			break;
+		case FSSFIFO_MICSTOP:
+			Cmd_MicStop();
+			break;
 	}
 }
 
