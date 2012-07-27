@@ -131,6 +131,10 @@ static void Track_ClearState(fss_track_t* trk)
 	trk->pitchBendRange = 2;
 	trk->pitchBend = 0;
 	trk->transpose = 0;
+	trk->a = 0xFF;
+	trk->d = 0xFF;
+	trk->s = 0xFF;
+	trk->r = 0xFF;
 	trk->modType = 0;
 	trk->modRange = 1;
 	trk->modSpeed = 16;
@@ -429,10 +433,10 @@ _ReadRecord:
 	chn->modCounter = 0;
 	FSS_NoteLengths[nCh] = len;
 
-	chn->attackLvl = Cnv_Attack(pNoteDef->a);
-	chn->decayRate = Cnv_Fall(pNoteDef->d);
-	chn->sustainLvl = pNoteDef->s;
-	chn->releaseRate = Cnv_Fall(pNoteDef->r);
+	chn->attackLvl = Cnv_Attack(trk->a == 0xFF ? pNoteDef->a : trk->a);
+	chn->decayRate = Cnv_Fall(trk->d == 0xFF ? pNoteDef->d : trk->d);
+	chn->sustainLvl = trk->s == 0xFF ? pNoteDef->s : trk->s;
+	chn->releaseRate = Cnv_Fall(trk->r == 0xFF ? pNoteDef->r : trk->r);
 
 	Chn_UpdateVol(chn, trk);
 	Chn_UpdatePan(chn, trk);
@@ -730,15 +734,30 @@ void Track_Run(int handle)
 			}
 
 			//-----------------------------------------------------------------
-			// Envelope-related commands (TODO)
+			// Envelope-related commands
 			//-----------------------------------------------------------------
 
 			case SSEQ_CMD_ATTACK:
+			{
+				trk->a = read8(pData);
+				break;
+			}
+
 			case SSEQ_CMD_DECAY:
+			{
+				trk->d = read8(pData);
+				break;
+			}
+
 			case SSEQ_CMD_SUSTAIN:
+			{
+				trk->s = read8(pData);
+				break;
+			}
+
 			case SSEQ_CMD_RELEASE:
 			{
-				*pData += 1;
+				trk->r = read8(pData);
 				break;
 			}
 

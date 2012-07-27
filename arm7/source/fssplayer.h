@@ -37,6 +37,8 @@ typedef struct
 	s8 pitchBend;
 	s8 transpose;
 
+	u8 a,d,s,r;
+
 	u8 modType, modSpeed, modDepth, modRange;
 	u16 modDelay;
 } fss_track_t;
