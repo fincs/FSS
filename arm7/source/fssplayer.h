@@ -46,7 +46,7 @@ enum { PS_NONE, PS_INIT, PS_PLAY, PS_PAUSE, PS_STOP };
 #define SIG_NULL 0xFF
 
 enum { TS_ALLOCBIT = BIT(0), TS_MUTEBIT = BIT(1), TS_NOTEWAIT = BIT(2), TS_PORTABIT = BIT(3), TS_TIEBIT = BIT(4), TS_END = BIT(7) };
-enum { TUF_VOL = BIT(0), TUF_PAN = BIT(1), TUF_TIMER = BIT(2), TUF_MOD = BIT(3) };
+enum { TUF_VOL = BIT(0), TUF_PAN = BIT(1), TUF_TIMER = BIT(2), TUF_MOD = BIT(3), TUF_LEN = BIT(4) };
 
 extern fss_player_t FSS_Players[FSS_PLAYERCOUNT];
 extern fss_track_t FSS_Tracks[FSS_MAXTRACKS];
@@ -78,7 +78,7 @@ typedef struct
 	byte_t state;
 	char_t trackId; // -1 = none
 	byte_t prio;
-	byte_t _pad;
+	byte_t manualSweep;
 
 	u8 flags;
 	s8 pan; // -64 .. 63

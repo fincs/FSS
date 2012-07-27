@@ -92,6 +92,8 @@ void Snd_Timer()
 	register int i;
 	//int cS = enterCriticalSection();
 
+	Chn_UpdateTracks();
+
 	for (i = 0; i < 16; i ++)
 	{
 		if (FSS_ChnLockMask & BIT(i))
@@ -102,7 +104,6 @@ void Snd_Timer()
 	for (i = 0; i < FSS_PLAYERCOUNT; i ++)
 		Player_Run(i);
 
-	Chn_UpdateTracks();
 	Snd_UpdWorkData();
 
 	//leaveCriticalSection(cS);
@@ -237,7 +238,8 @@ void Snd_UpdChannel(fss_channel_t* pCh, int nCh)
 			int len = pCh->sweepLen;
 			int cnt = pCh->sweepCnt;
 			totalAdj += ((s64)pCh->sweepPitch*(len-cnt)) / len;
-			pCh->sweepCnt ++;
+			if (!pCh->manualSweep)
+				pCh->sweepCnt ++;
 		}
 		u16 tmr = pCh->reg.TIMER;
 

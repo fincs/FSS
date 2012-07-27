@@ -313,14 +313,9 @@ static inline void Chn_UpdateMod(fss_channel_t* chn, fss_track_t* trk)
 	chn->modDelay = trk->modDelay;
 }
 
-static inline int CalcNoteLen(fss_player_t* ply, int len)
+static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk, int chnId)
 {
-	int realTempo = ((int)ply->tempo * (int)ply->tempoRate) >> 8;
-	return (len*240 + realTempo - 1) / realTempo;
-}
-
-static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
-{
+	chn->manualSweep = 0;
 	chn->sweepPitch = trk->sweepPitch;
 	chn->sweepCnt = 0;
 	if (!(trk->state & TS_PORTABIT))
@@ -333,8 +328,10 @@ static inline void Chn_UpdatePorta(fss_channel_t* chn, fss_track_t* trk)
 	chn->sweepPitch += diff >> 16;
 
 	if (trk->portaTime == 0)
-		chn->sweepLen = CalcNoteLen(trk->ply, FSS_NoteLengths[chn - FSS_Channels]);
-	else
+	{
+		chn->sweepLen = FSS_NoteLengths[chnId];
+		chn->manualSweep = 1;
+	}else
 	{
 		int sq_time = (u32)trk->portaTime * (u32)trk->portaTime;
 		int abs_sp = chn->sweepPitch;
@@ -441,7 +438,7 @@ _ReadRecord:
 	Chn_UpdatePan(chn, trk);
 	Chn_UpdateTune(chn, trk);
 	Chn_UpdateMod(chn, trk);
-	Chn_UpdatePorta(chn, trk);
+	Chn_UpdatePorta(chn, trk, nCh);
 
 	trk->portaKey = key;
 
@@ -476,7 +473,7 @@ int Note_On_Tie(int trkNo, int key, int vel)
 	//Chn_UpdatePan(chn, trk);
 	Chn_UpdateTune(chn, trk);
 	Chn_UpdateMod(chn, trk);
-	Chn_UpdatePorta(chn, trk);
+	Chn_UpdatePorta(chn, trk, i);
 
 	trk->portaKey = key;
 	return i;
@@ -506,6 +503,17 @@ void Chn_UpdateTracks()
 		if (!flags) continue;
 
 		fss_track_t* trk = FSS_Tracks + trkn;
+		if (flags & TUF_LEN)
+		{
+			int st = chn->state;
+			if (st > CS_START)
+			{
+				if (st < CS_RELEASE && !--FSS_NoteLengths[i])
+					Chn_Release(chn, i);
+				if (chn->manualSweep && chn->sweepCnt < chn->sweepLen)
+					chn->sweepCnt ++;
+			}
+		}
 		if (flags & TUF_VOL)
 		{
 			Chn_UpdateVol(chn, trk);
@@ -533,17 +541,6 @@ void Chn_UpdateTracks()
 	memset(FSS_TrackUpdateFlags, 0, sizeof(FSS_TrackUpdateFlags));
 }
 
-void Track_UpdNoteLengths(int handle)
-{
-	register int i;
-	for (i = 0; i < 16; i ++)
-	{
-		fss_channel_t* chn = FSS_Channels + i;
-		if (chn->state > CS_NONE && chn->trackId == handle && chn->state != CS_RELEASE && !--FSS_NoteLengths[i])
-			Chn_Release(chn, i);
-	}
-}
-
 void Track_ReleaseAllNotes(int handle)
 {
 	register int i;
@@ -557,9 +554,11 @@ void Track_ReleaseAllNotes(int handle)
 
 void Track_Run(int handle)
 {
-	Track_UpdNoteLengths(handle);
 	fss_track_t* trk = FSS_Tracks + handle;
 	if (trk->state & TS_END) return;
+
+	// Indicate "heartbeat" for this track
+	FSS_TrackUpdateFlags[handle] |= TUF_LEN;
 
 	if (trk->wait)
 	{
