@@ -60,3 +60,8 @@ extern int FSS_WorkUpdFlags;
 void Cmd_MicStart(msg_micstart* data);
 void Cmd_MicGetPos();
 void Cmd_MicStop();
+
+void Cmd_StrmSetup(msg_strmsetup* buf);
+void Strm_Setup(int _fmt, int _timer, void* buf, int buflen);
+void Strm_SetStatus(bool bStatus);
+int Strm_GetPos();

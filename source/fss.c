@@ -359,3 +359,30 @@ int FSS_MicGetPos()
 	return CALL_ARM7();
 }
 
+void FSS_RawStreamSetup(void* buf, int buflen, int timer, int fmt)
+{
+	msg_strmsetup msg;
+	msg.msgtype = FSSFIFO_STRMSETUP;
+	msg.buf = buf;
+	msg.buflen = buflen;
+	msg.timer = timer;
+	msg.fmt = fmt;
+
+	CALL_ARM7();
+};
+
+void FSS_RawStreamSetStatus(bool bStatus)
+{
+	msg_generic msg;
+	msg.msgtype = FSSFIFO_STRMSETSTATUS;
+	msg.which = bStatus;
+
+	CALL_ARM7();
+}
+
+int FSS_RawStreamGetPos()
+{
+	int msg = FSSFIFO_STRMGETPOS;
+
+	return CALL_ARM7();
+}

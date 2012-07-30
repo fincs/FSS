@@ -127,6 +127,16 @@ void fssDatamsgHandler(int nBytes, void* user_data)
 		case FSSFIFO_MICSTOP:
 			Cmd_MicStop();
 			break;
+		case FSSFIFO_STRMSETUP:
+			Cmd_StrmSetup((msg_strmsetup*) rBuf);
+			break;
+		case FSSFIFO_STRMSETSTATUS:
+			Strm_SetStatus(((msg_generic*) rBuf)->which);
+			fifoReturn(fssFifoCh, 0);
+			break;
+		case FSSFIFO_STRMGETPOS:
+			fifoReturn(fssFifoCh, Strm_GetPos());
+			break;
 	}
 }
 

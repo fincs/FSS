@@ -21,6 +21,7 @@ enum { DutyCycle_0 = 7, DutyCycle_12 = 0, DutyCycle_25, DutyCycle_37, DutyCycle_
 #define TONE_TIMER(n) SOUND_TIMER((n)*8)
 #define INVALID_SND_HANDLE (-1)
 #define DEFAULT_PRIO 0x80
+#define DEFAULT_STRM_BUF_SIZE 8192
 
 #define __Mixer 0
 #define __Chn1 1
@@ -66,6 +67,16 @@ enum
 	UpdFlags_Channels = BIT(2)
 };
 
+enum
+{
+	StreamFormat_8Bit = SoundFormat_8Bit,
+	StreamFormat_16Bit = SoundFormat_16Bit,
+
+	StreamFormat_Mono = (0 << 2),
+	StreamFormat_SplitStereo = (1 << 2),
+	StreamFormat_Stereo = (3 << 2) // interleaved
+};
+
 typedef struct
 {
 	const void* data;
@@ -73,6 +84,17 @@ typedef struct
 	hword_t loopPoint;
 	hword_t format;
 } fss_sample_t;
+
+typedef struct _tag_fss_stream_t fss_stream_t;
+
+typedef int (*fssStreamCallback)(void* userData, void* outBuf, const fss_stream_t* streamData, int reqSamples);
+
+struct _tag_fss_stream_t
+{
+	u16 timer, format;
+	int bufSampleCount;
+	fssStreamCallback callback;
+};
 
 static inline const void** __SBNK_GetWavLinkEntryPtr(const void* pBnk, int id)
 {
@@ -172,6 +194,22 @@ FSS_API void FSS_ChannelRead(int handle, fss_chndata_t* pData);
 FSS_API void FSS_MicStart(void* buffer, int sampCount, int format, int timer);
 FSS_API void FSS_MicStop();
 FSS_API int FSS_MicGetPos();
+
+FSS_API bool FSS_StreamSetup(const fss_stream_t* pStream, void* userData);
+FSS_API int  FSS_StreamSetStatus(bool bActive);
+FSS_API bool FSS_StreamGetStatus();
+FSS_API int  FSS_StreamMain();
+FSS_API void FSS_StreamFree();
+
+static inline void FSS_StreamStart()
+{
+	FSS_StreamSetStatus(true);
+}
+
+static inline void FSS_StreamStop()
+{
+	FSS_StreamSetStatus(false);
+}
 
 #ifdef __cplusplus
 }
