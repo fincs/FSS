@@ -201,14 +201,14 @@ FSS_API bool FSS_StreamGetStatus();
 FSS_API int  FSS_StreamMain();
 FSS_API void FSS_StreamFree();
 
-static inline void FSS_StreamStart()
+static inline int FSS_StreamStart()
 {
-	FSS_StreamSetStatus(true);
+	return FSS_StreamSetStatus(true);
 }
 
-static inline void FSS_StreamStop()
+static inline int FSS_StreamStop()
 {
-	FSS_StreamSetStatus(false);
+	return FSS_StreamSetStatus(false);
 }
 
 #ifdef __cplusplus
