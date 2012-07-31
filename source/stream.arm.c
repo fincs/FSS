@@ -128,8 +128,8 @@ bool FSS_StreamSetup(const fss_stream_t* pStream, void* userData)
 	int format = pStream->format;
 	int timer = pStream->timer;
 	strmSmpMask = (format & BIT(3)) ? 3 : 0; // stereo interleaved sources NEED word-alignment
-	// Word-align buffer size
-	smpCount &= (format & BIT(0)) ? (~1) : (~3);
+	// Round the buffer size obeying the sample mask, or at least word-aligning it
+	smpCount &= strmSmpMask ? (~strmSmpMask) : (format & BIT(0)) ? (~1) : (~3);
 	strmBufSize = smpCount << SHIFTER(format & BIT(0));
 	int bufSizeWords = strmBufSize >> 2;
 	strmBufSize <<= SHIFTER(format & BIT(2)) + 1; // Stereo and work buf.
