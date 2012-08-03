@@ -35,4 +35,5 @@ CONF_DEFINES = -DFSS_BUILD
 include $(FEOSMK)/dynlib.mk
 
 install: all
-	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/lib/$(TARGET).fx2 || exit 1
+	@mkdir -p $(FEOSDEST)/data/FeOS/lib
+	@cp $(TARGET).fx2 $(FEOSDEST)/data/FeOS/lib/$(TARGET).fx2

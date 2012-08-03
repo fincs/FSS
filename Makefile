@@ -1,3 +1,10 @@
+FEOSMK = $(FEOSSDK)/mk
+
+MANIFEST    := manifest.txt
+PACKAGENAME := fss
+
+include $(FEOSMK)/packagetop.mk
+
 all:
 	@$(MAKE) -C arm7
 	@$(MAKE) -f mainlib.mk

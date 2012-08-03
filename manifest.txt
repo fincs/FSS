@@ -1,0 +1,6 @@
+Title: FeOS Sound System library
+Author: fincs <fincs@mtheall.com>
+Copyright: 2012 fincs
+Description: A library that allows programs to make use of the Nintendo DS sound hardware.
+Version: 0.0-prerelease
+License: WTFPL
