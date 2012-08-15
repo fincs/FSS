@@ -56,7 +56,7 @@ static inline word_t fifoGetRetValue(int ch)
 }
 
 enum { FMT_8BIT, FMT_16BIT, FMT_ADPCM, FMT_LOOP = 4 };
-enum { PRM_VOL, PRM_PAN, PRM_TIMER, PRM_DUTY };
+enum { PRM_VOL, PRM_PAN, PRM_TIMER, PRM_DUTY, PRM_TUNE };
 enum { FMT_STM_MONO = (0 << 2), FMT_STM_STEREO = (1 << 2), FMT_STM_STEREO_INTERLEAVED = (3 << 2) };
 
 typedef struct

@@ -119,7 +119,7 @@ FSS_API int FSS_PlaySample(fss_sample_t* pSample, int timer, int volume, int pan
 FSS_API int FSS_PlayTone(int duty, int timer, int volume, int pan, int prio);
 FSS_API int FSS_PlayNoise(int timer, int volume, int pan, int prio);
 
-enum { Param_Volume, Param_Pan, Param_Timer, Param_Duty };
+enum { Param_Volume, Param_Pan, Param_Timer, Param_Duty, Param_Tuning };
 
 FSS_API bool FSS_ChnIsActive(int handle);
 FSS_API void FSS_ChnStop(int handle);
@@ -143,6 +143,12 @@ static inline void FSS_ChnSetTimer(int handle, int timer)
 static inline void FSS_ChnSetDuty(int handle, int duty)
 {
 	FSS_ChnSetParam(handle, Param_Duty, duty);
+}
+
+// tuning = 1/64ths of a semitone
+static inline void FSS_ChnSetTuning(int handle, int tuning)
+{
+	FSS_ChnSetParam(handle, Param_Tuning, tuning);
 }
 
 FSS_API int FSS_PlayerAlloc(int prio);

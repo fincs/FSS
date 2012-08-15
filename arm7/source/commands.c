@@ -123,6 +123,10 @@ void Cmd_ChnSetParam(msg_chnsetparam* pArgs)
 			pCh->reg.CR |= SOUND_DUTY(pArgs->vParam);
 			pCh->flags |= F_UPDPAN; // HACKHACK
 			break;
+		case PRM_TUNE:
+			pCh->extTune = pArgs->vParam;
+			pCh->flags |= F_UPDTMR;
+			break;
 	}
 	fifoReturn(fssFifoCh, 0);
 }
