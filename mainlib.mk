@@ -31,6 +31,8 @@ DATA          := data
 INCLUDES      := include common_inc
 
 CONF_DEFINES = -DFSS_BUILD
+CONF_USERLIBS = sndlock
+CONF_LIBS = -lsndlock
 
 include $(FEOSMK)/dynlib.mk
 

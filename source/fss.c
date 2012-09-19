@@ -1,8 +1,10 @@
 #include "fss_private.h"
+#include <sndlock.h>
 
 int fssFifoCh = -1;
 static int fssRefCount = 0;
 static instance_t fssArm7Handle;
+static sndlock_t fssLock;
 
 // The funny 32-byte stuff is because it's the size of a cache line
 __attribute__((aligned(32))) static byte_t __sharedworkBuf[FSS_SHAREDWORKSIZE];
@@ -35,9 +37,17 @@ bool FSS_Startup()
 	if (fssRefCount++) return true;
 
 	// Do the real startup
+
+	if (!SndLock_Acquire("FSS", &fssLock))
+	{
+		fssRefCount--;
+		return false;
+	}
+
 	fssArm7Handle = FeOS_LoadARM7("/data/FeOS/arm7/FSS7.fx2", &fssFifoCh);
 	if (!fssArm7Handle)
 	{
+		SndLock_Release(fssLock);
 		fssRefCount--;
 		return false;
 	}
@@ -66,6 +76,7 @@ void FSS_Cleanup()
 	if (--fssRefCount) return;
 
 	// Do the real cleanup
+	SndLock_Release(fssLock);
 	FeOS_FreeARM7(fssArm7Handle, fssFifoCh);
 	fssArm7Handle = NULL, fssFifoCh = -1;
 }
