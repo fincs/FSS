@@ -96,20 +96,20 @@ struct _tag_fss_stream_t
 	fssStreamCallback callback;
 };
 
-static inline const void** __SBNK_GetWavLinkEntryPtr(const void* pBnk, int id)
+static inline void** __SBNK_GetWavLinkEntryPtr(const void* pBnk, int id)
 {
-	return (const void**)((char*)pBnk + 24 + id*sizeof(void*));
+	return (void**)((char*)pBnk + 24 + id*sizeof(void*));
 }
 
-static inline void FSS_SetBankWar(const void* pBnk, int warId, const void* pWar)
+static inline void FSS_SetBankWar(void* pBnk, int warId, const void* pWar)
 {
-	const void** pEnt = __SBNK_GetWavLinkEntryPtr(pBnk, warId);
+	const void** pEnt = (const void**) __SBNK_GetWavLinkEntryPtr(pBnk, warId);
 	*pEnt = pWar;
 }
 
-static inline const void* FSS_GetBankWar(const void* pBnk, int warId)
+static inline void* FSS_GetBankWar(const void* pBnk, int warId)
 {
-	const void** pEnt = __SBNK_GetWavLinkEntryPtr(pBnk, warId);
+	void** pEnt = __SBNK_GetWavLinkEntryPtr(pBnk, warId);
 	return *pEnt;
 }
 
