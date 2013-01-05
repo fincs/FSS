@@ -124,6 +124,10 @@ static inline int FSS_StreamRead(int reqSamples)
 #define SHIFTER(x) (!!(x))
 bool FSS_StreamSetup(const fss_stream_t* pStream, void* userData)
 {
+	// Do not allow setting a stream up if there's already one
+	if (strmBuffer)
+		return false;
+
 	int smpCount = pStream->bufSampleCount;
 	int format = pStream->format;
 	int timer = pStream->timer;
@@ -151,6 +155,11 @@ bool FSS_StreamSetup(const fss_stream_t* pStream, void* userData)
 	return true;
 }
 
+bool FSS_StreamExists()
+{
+	return strmBuffer != 0;
+}
+
 int FSS_StreamMain()
 {
 	if (!strmStatus) return 0;
@@ -169,6 +178,7 @@ int FSS_StreamSetStatus(bool bActive)
 {
 	int rc = 1;
 
+	if (!strmBuffer) return -1;
 	if (strmStatus == bActive) return rc; // nothing to do
 
 	if (!bActive)
@@ -184,6 +194,11 @@ int FSS_StreamSetStatus(bool bActive)
 	FSS_RawStreamSetStatus(bActive);
 	strmStatus = bActive;
 	return rc;
+}
+
+bool FSS_StreamGetStatus()
+{
+	return strmBuffer && strmStatus;
 }
 
 void FSS_StreamFree()

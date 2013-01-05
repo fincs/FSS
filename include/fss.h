@@ -1,4 +1,6 @@
 #pragma once
+#include <feos.h>
+#include <stdlib.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -202,6 +204,7 @@ FSS_API void FSS_MicStop();
 FSS_API int FSS_MicGetPos();
 
 FSS_API bool FSS_StreamSetup(const fss_stream_t* pStream, void* userData);
+FSS_API bool FSS_StreamExists();
 FSS_API int  FSS_StreamSetStatus(bool bActive);
 FSS_API bool FSS_StreamGetStatus();
 FSS_API int  FSS_StreamMain();
