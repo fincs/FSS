@@ -697,8 +697,8 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_LOOPSTART:
 			{
-				trk->stack[trk->stackPos] = *pData;
-				trk->loopCount[trk->stackPos ++] = read8(pData);
+				trk->loopCount[trk->stackPos] = read8(pData);
+				trk->stack[trk->stackPos ++] = *pData;
 				break;
 			}
 
