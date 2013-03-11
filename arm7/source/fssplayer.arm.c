@@ -116,7 +116,7 @@ static int readvl(const u8** ppData)
 
 static void Track_ClearState(fss_track_t* trk)
 {
-	trk->state = TS_ALLOCBIT;
+	trk->state = TS_ALLOCBIT | TS_NOTEWAIT;
 	trk->prio = trk->ply->prio + 64;
 	trk->pos = trk->startPos;
 	trk->stackPos = 0;
@@ -480,6 +480,7 @@ int Note_On_Tie(int trkNo, int key, int vel)
 	Chn_UpdatePorta(chn, trk, i);
 
 	trk->portaKey = key;
+	chn->flags |= F_UPDTMR;
 	return i;
 }
 
