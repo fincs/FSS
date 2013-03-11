@@ -559,10 +559,12 @@ void Track_ReleaseAllNotes(int handle)
 void Track_Run(int handle)
 {
 	fss_track_t* trk = FSS_Tracks + handle;
-	if (trk->state & TS_END) return;
 
 	// Indicate "heartbeat" for this track
 	FSS_TrackUpdateFlags[handle] |= TUF_LEN;
+
+	// Exit if the track has already ended
+	if (trk->state & TS_END) return;
 
 	if (trk->wait)
 	{
