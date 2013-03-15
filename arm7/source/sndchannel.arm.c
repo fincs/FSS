@@ -145,7 +145,7 @@ void Snd_UpdChannel(fss_channel_t* pCh, int nCh)
 	u8* pFlag = &pCh->flags;
 	const bool bNotInSustain = pCh->state != CS_SUSTAIN;
 	const bool bInStart = pCh->state == CS_START;
-	const bool bPitchSweep = pCh->sweepPitch != 0 && pCh->sweepCnt <= pCh->sweepLen;
+	const bool bPitchSweep = pCh->sweepPitch != 0 && pCh->sweepLen && pCh->sweepCnt <= pCh->sweepLen;
 	bool bModulation = pCh->modDepth != 0;
 	bool bVolNeedUpdate = bNotInSustain || *pFlag & F_UPDVOL;
 	bool bPanNeedUpdate = *pFlag & F_UPDPAN || bInStart;
