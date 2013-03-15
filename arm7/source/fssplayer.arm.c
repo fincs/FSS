@@ -705,10 +705,9 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_LOOPEND:
 			{
-				const byte_t* rPos = trk->stack[trk->stackPos];
-				u8* nR = trk->loopCount + trk->stackPos;
-				if (*nR && !--*nR) trk->stackPos --;
-				*pData = rPos;
+				u8* nR = trk->loopCount + trk->stackPos - 1;
+				if (!*nR || !--*nR) trk->stackPos --;
+				else *pData = trk->stack[trk->stackPos - 1];
 				break;
 			}
 
