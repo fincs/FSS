@@ -20,11 +20,13 @@ int Cnv_Attack(int attk)
 		0x5C, 0x64, 0x6D, 0x74, 0x7B, 0x7F, 0x84, 0x89, 0x8F
 	};
 	
+	if (attk & 0x80) attk = 64; // Supposedly invalid value... Use apparently correct default
 	return (attk >= 0x6D) ? lut[0x7F-attk] : (0xFF-attk);
 }
 
 int Cnv_Fall(int fall)
 {
+	if      (fall & 0x80) fall = 64; // Supposedly invalid value... Use apparently correct default
 	if      (fall == 0x7F) return 0xFFFF;
 	else if (fall == 0x7E) return 0x3C00;
 	else if (fall < 0x32)  return ((fall<<1)+1) & 0xFFFF;
@@ -53,6 +55,7 @@ int Cnv_Sust(int sust)
 		-10, -8, -7, -6, -4, -3, -1, 0
 	};
 
+	if (sust & 0x80) sust = 64; // Supposedly invalid value... Use apparently correct default
 	return lut[sust];
 }
 
