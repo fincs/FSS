@@ -117,7 +117,7 @@ static inline void* FSS_GetBankWar(const void* pBnk, int warId)
 
 #include "fssdata.h"
 
-FSS_API int FSS_PlaySample(fss_sample_t* pSample, int timer, int volume, int pan, int prio);
+FSS_API int FSS_PlaySample(const fss_sample_t* pSample, int timer, int volume, int pan, int prio);
 FSS_API int FSS_PlayTone(int duty, int timer, int volume, int pan, int prio);
 FSS_API int FSS_PlayNoise(int timer, int volume, int pan, int prio);
 

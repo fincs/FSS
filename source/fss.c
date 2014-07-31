@@ -81,7 +81,7 @@ void FSS_Cleanup()
 	fssArm7Handle = NULL, fssFifoCh = -1;
 }
 
-int FSS_PlaySample(fss_sample_t* pSample, int timer, int volume, int pan, int prio)
+int FSS_PlaySample(const fss_sample_t* pSample, int timer, int volume, int pan, int prio)
 {
 	msg_playsmp msg;
 	msg.msgtype = FSSFIFO_PLAYSMP;
