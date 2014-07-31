@@ -117,7 +117,7 @@ static inline int FSS_StreamRead(int reqSamples)
 	printf("\n");
 #endif
 	DC_FlushRange(strmBuffer, strmBufSize >> 1);
-	FeOS_DrainWriteBuffer();
+	DC_DrainWriteBuffer();
 	return orgReqSamples - reqSamples;
 }
 

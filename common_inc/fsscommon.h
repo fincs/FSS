@@ -40,20 +40,20 @@ enum
 	FSSFIFO_STRMSETUP, FSSFIFO_STRMSETSTATUS, FSSFIFO_STRMGETPOS
 };
 
+#define fifoReturn(ch, x) do { fifoSendValue32(ch, (u32)(x)); return; } while(0)
+
 #ifdef ARM7
 #define fifoRetWait(ch) while(!fifoCheckValue32(ch))
-#else
-#define fifoRetWait(ch) do { while(!fifoCheckValue32(ch)) FeOS_WaitForIRQ(~0); } while(0)
-#endif
 #define fifoRetValue(ch) fifoGetValue32(ch)
-
-#define fifoReturn(ch, x) do { fifoSendValue32(ch, (u32)(x)); return; } while(0)
 
 static inline word_t fifoGetRetValue(int ch)
 {
 	fifoRetWait(ch);
 	return fifoRetValue(ch);
 }
+#else
+#define fifoGetRetValue fifoGetRetValue32
+#endif
 
 enum { FMT_8BIT, FMT_16BIT, FMT_ADPCM, FMT_LOOP = 4 };
 enum { PRM_VOL, PRM_PAN, PRM_TIMER, PRM_DUTY, PRM_TUNE };

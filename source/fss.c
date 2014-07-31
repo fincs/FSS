@@ -3,7 +3,7 @@
 
 int fssFifoCh = -1;
 static int fssRefCount = 0;
-static instance_t fssArm7Handle;
+static module_t fssArm7Handle;
 static sndlock_t fssLock;
 
 // The funny 32-byte stuff is because it's the size of a cache line
@@ -44,7 +44,7 @@ bool FSS_Startup()
 		return false;
 	}
 
-	fssArm7Handle = FeOS_LoadARM7("/data/FeOS/arm7/FSS7.fx2", &fssFifoCh);
+	fssArm7Handle = DSLoadARM7("/data/FeOS/arm7/FSS7.fx2", &fssFifoCh);
 	if (!fssArm7Handle)
 	{
 		SndLock_Release(fssLock);
@@ -77,7 +77,7 @@ void FSS_Cleanup()
 
 	// Do the real cleanup
 	SndLock_Release(fssLock);
-	FeOS_FreeARM7(fssArm7Handle, fssFifoCh);
+	DSFreeARM7(fssArm7Handle, fssFifoCh);
 	fssArm7Handle = NULL, fssFifoCh = -1;
 }
 
