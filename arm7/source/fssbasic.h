@@ -49,6 +49,7 @@ void Chn_UpdateTracks();
 void Cmd_PlayerAlloc(msg_playeralloc* pArgs);
 void Cmd_PlayerSetup(msg_playersetup* pArgs);
 void Cmd_PlayerPlay(msg_singleplayer* pArgs);
+void Cmd_PlayerSetParam(msg_chnsetparam* pArgs);
 
 void Cmd_PlayerRead(fss_plydata_t* data, int param);
 void Cmd_TrackRead(fss_trkdata_t* data, int param);

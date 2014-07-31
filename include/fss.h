@@ -121,7 +121,7 @@ FSS_API int FSS_PlaySample(const fss_sample_t* pSample, int timer, int volume, i
 FSS_API int FSS_PlayTone(int duty, int timer, int volume, int pan, int prio);
 FSS_API int FSS_PlayNoise(int timer, int volume, int pan, int prio);
 
-enum { Param_Volume, Param_Pan, Param_Timer, Param_Duty, Param_Tuning };
+enum { Param_Volume, Param_Pan, Param_Timer, Param_Duty, Param_Tuning, Param_Tempo=Param_Timer };
 
 FSS_API bool FSS_ChnIsActive(int handle);
 FSS_API void FSS_ChnStop(int handle);
@@ -159,6 +159,7 @@ FSS_API void FSS_PlayerPlay(int handle);
 FSS_API void FSS_PlayerStopEx(int handle, bool bKillChannels);
 FSS_API void FSS_PlayerSetPause(int handle, bool bPause);
 FSS_API void FSS_PlayerFree(int handle);
+FSS_API void FSS_PlayerSetParam(int handle, int type, int param);
 
 static inline void FSS_PlayerStop(int handle)
 {

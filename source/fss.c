@@ -221,6 +221,17 @@ void FSS_PlayerFree(int handle)
 	CALL_ARM7();
 }
 
+void FSS_PlayerSetParam(int handle, int type, int param)
+{
+	msg_chnsetparam msg;
+	msg.msgtype = FSSFIFO_PLAYERSETPARAM;
+	msg.ch = handle;
+	msg.tParam = type;
+	msg.vParam = param;
+
+	CALL_ARM7();
+}
+
 void FSS_LockChannels(word_t mask)
 {
 	msg_generic msg;

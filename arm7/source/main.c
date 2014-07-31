@@ -77,6 +77,9 @@ void fssDatamsgHandler(int nBytes, void* user_data)
 			Player_Free(((msg_generic*) rBuf)->which);
 			fifoReturn(fssFifoCh, 0);
 			break;
+		case FSSFIFO_PLAYERSETPARAM:
+			Cmd_PlayerSetParam((msg_chnsetparam*) rBuf);
+			break;
 		case FSSFIFO_SETOUTPFLAGS:
 			Snd_SetOutputFlags(((msg_generic*) rBuf)->which);
 			fifoReturn(fssFifoCh, 0);

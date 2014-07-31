@@ -147,6 +147,34 @@ void Cmd_PlayerPlay(msg_singleplayer* pArgs)
 	fifoReturn(fssFifoCh, 0);
 }
 
+void Cmd_PlayerSetParam(msg_chnsetparam* pArgs)
+{
+	fss_player_t* ply = FSS_Players + pArgs->ch;
+	int updMask = 0;
+	switch (pArgs->tParam)
+	{
+		case PRM_VOL:
+			ply->userVol = Cnv_Vol(pArgs->vParam);
+			updMask = TUF_VOL;
+			break;
+		case PRM_TUNE:
+			ply->userPitch = (u16)pArgs->vParam;
+			updMask = TUF_TIMER;
+			break;
+		case PRM_TIMER:
+			ply->tempoRate = (u16)pArgs->vParam;
+			break;
+	}
+	if (updMask)
+	{
+		u8* tIds = ply->trackIds;
+		int i;
+		for (i = 0; i < ply->nTracks; i ++)
+			FSS_TrackUpdateFlags[*tIds++] |= TUF_VOL;
+	}
+	fifoReturn(fssFifoCh, 0);
+}
+
 void Cmd_PlayerRead(fss_plydata_t* data, int param)
 {
 	fss_player_t* ply = FSS_Players + param;
