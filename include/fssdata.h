@@ -18,9 +18,12 @@ typedef struct
 
 typedef struct
 {
-	u8 state, number, playerId, pad;
+	u8 state, number, playerId, _pad;
 	const u8* pos;
 	u8 patch, vol, expr, pan;
+	s8 bend;
+	u8 bendRange;
+	u16 _pad2;
 } fss_trkdata_t;
 
 typedef struct

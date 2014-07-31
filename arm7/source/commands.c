@@ -173,6 +173,8 @@ void Cmd_TrackRead(fss_trkdata_t* data, int param)
 	data->vol = trk->vol;
 	data->expr = trk->expr;
 	data->pan = trk->pan + 64;
+	data->bend = trk->pitchBend;
+	data->bendRange = trk->pitchBendRange;
 }
 
 void Cmd_ChannelRead(fss_chndata_t* data, int param)
@@ -183,7 +185,7 @@ void Cmd_ChannelRead(fss_chndata_t* data, int param)
 		return;
 
 	data->trackId = chn->trackId;
-	data->pan = chn->pan + 64;
+	data->pan = (chn->reg.CR >> 16) & 0x7F;
 	data->key = chn->key;
 	data->vol = FSS_ChnVol[param];
 	data->patch = chn->patch;
