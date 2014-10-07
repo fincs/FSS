@@ -259,6 +259,7 @@ void Snd_UpdChannel(fss_channel_t* pCh, int nCh)
 			if (bModulation && modType == 1) totalVol += modParam;
 			totalVol += AMPL_K;
 			if (totalVol < 0) totalVol = 0;
+			if (totalVol > AMPL_K) totalVol = AMPL_K;
 
 			cr &= ~(SOUND_VOL(0x7F) | SOUND_VOLDIV(3));
 			cr |= SOUND_VOL((int)swiGetVolumeTable(totalVol));
