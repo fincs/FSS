@@ -106,6 +106,8 @@ void Snd_Timer()
 
 	Snd_UpdWorkData();
 
+	Cnv_Random(); // Run the PRNG
+
 	//leaveCriticalSection(cS);
 }
 

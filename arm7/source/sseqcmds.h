@@ -1,5 +1,8 @@
 #pragma once
 
+#define SSEQ_CMD_TRACKALLOC 0xFE
+#define SSEQ_CMD_TRACKCONF 0x93
+
 #define SSEQ_CMD_REST 0x80
 #define SSEQ_CMD_PATCH 0x81
 #define SSEQ_CMD_PAN 0xC0
@@ -39,8 +42,10 @@
 #define SSEQ_CMD_MODDELAY 0xE0
 
 #define SSEQ_CMD_RANDOM 0xA0
-#define SSEQ_CMD_PRINTVAR 0xD6
+#define SSEQ_CMD_VAR 0xA1
 #define SSEQ_CMD_IF 0xA2
-#define SSEQ_CMD_UNSUP1 0xA1
+
+#define SSEQ_CMD_PRINTVAR 0xD6
+
 #define SSEQ_CMD_UNSUP2_LO 0xB0
 #define SSEQ_CMD_UNSUP2_HI 0xBD

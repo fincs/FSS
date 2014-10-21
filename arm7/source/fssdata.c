@@ -99,3 +99,11 @@ int Cnv_Sine(int arg)
 	if (arg < 3*lut_size) return -lut[arg - 2*lut_size];
 	/*else*/              return -lut[4*lut_size - arg];
 }
+
+int Cnv_Random(void)
+{
+	static u32 seed = 0x12345678;
+	seed *= 1664525;
+	seed += 1013904223;
+	return seed >> 16;
+}

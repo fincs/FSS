@@ -114,7 +114,41 @@ static int readvl(const u8** ppData)
 	return x;
 }
 
-static void Track_ClearState(fss_track_t* trk)
+static inline vs16* getVarPtr(int var, int trkId)
+{
+	return _FSS_GetVarPtr(FSS_SharedWork, trkId, var);
+}
+
+static int readovr(const u8** ppData, fss_track_t* trk)
+{
+	trk->state &= ~TS_OVRBIT;
+	if (trk->state & TS_OVRVARBIT)
+	{
+		trk->state &= ~TS_OVRVARBIT;
+		return *getVarPtr(read8(ppData), trk-FSS_Tracks);
+	}
+	return trk->ovrValue;
+}
+
+static int read8_o(const u8** ppData, fss_track_t* trk)
+{
+	if (trk->state & TS_OVRBIT) return readovr(ppData, trk);
+	return read8(ppData);
+}
+
+static int read16_o(const u8** ppData, fss_track_t* trk)
+{
+	if (trk->state & TS_OVRBIT) return readovr(ppData, trk);
+	return read16(ppData);
+}
+
+static int readvl_o(const u8** ppData, fss_track_t* trk)
+{
+	if (trk->state & TS_OVRBIT) return readovr(ppData, trk);
+	return readvl(ppData);
+}
+
+void Track_ClearState(fss_track_t* trk)
 {
 	trk->state = TS_ALLOCBIT | TS_NOTEWAIT;
 	trk->prio = trk->ply->prio + 64;
@@ -201,8 +235,8 @@ bool Player_Setup(int handle, const byte_t* pSeq, const byte_t* pBnk, const byte
 	tArray[0] = firstTrack;
 
 	const byte_t* pData = ply->pSeqData;
-	if (*pData == 0xFE)
-	for (pData += 3; *pData == 0x93;) // Prepare extra tracks
+	if (*pData == SSEQ_CMD_TRACKALLOC)
+	for (pData += 3; *pData == SSEQ_CMD_TRACKCONF;) // Prepare extra tracks
 	{
 		pData ++;
 		int tNum = read8(&pData);
@@ -583,7 +617,7 @@ void Track_Run(int handle)
 			// Note on
 			int key = cmd + trk->transpose;
 			int vel = read8(pData);
-			int len = readvl(pData);
+			int len = readvl_o(pData, trk);
 			if (trk->state & TS_NOTEWAIT) trk->wait = len;
 			if (!(trk->state & TS_TIEBIT))
 				Note_On(handle, key, vel, len);
@@ -597,13 +631,13 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_REST:
 			{
-				trk->wait = readvl(pData);
+				trk->wait = readvl_o(pData, trk);
 				break;
 			}
 
 			case SSEQ_CMD_PATCH:
 			{
-				trk->patch = readvl(pData);
+				trk->patch = readvl_o(pData, trk);
 				break;
 			}
 
@@ -629,7 +663,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_PAN:
 			{
-				int pan = read8(pData) - 64;
+				int pan = read8_o(pData, trk) - 64;
 				trk->pan = pan;
 				FSS_TrackUpdateFlags[handle] |= TUF_PAN;
 				break;
@@ -637,7 +671,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_VOL:
 			{
-				int vol = read8(pData);
+				int vol = read8_o(pData, trk);
 				trk->vol = vol;
 				FSS_TrackUpdateFlags[handle] |= TUF_VOL;
 				break;
@@ -645,7 +679,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_MASTERVOL:
 			{
-				trk->ply->masterVol = Cnv_Sust(read8(pData));
+				trk->ply->masterVol = Cnv_Sust(read8_o(pData, trk));
 				register int i;
 				fss_player_t* ply = trk->ply;
 				u8* tIds = ply->trackIds;
@@ -678,7 +712,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_EXPR:
 			{
-				int expr = read8(pData);
+				int expr = read8_o(pData, trk);
 				trk->expr = expr;
 				FSS_TrackUpdateFlags[handle] |= TUF_VOL;
 				break;
@@ -698,7 +732,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_LOOPSTART:
 			{
-				trk->loopCount[trk->stackPos] = read8(pData);
+				trk->loopCount[trk->stackPos] = read8_o(pData, trk);
 				trk->stack[trk->stackPos ++] = *pData;
 				break;
 			}
@@ -717,13 +751,13 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_TRANSPOSE:
 			{
-				trk->transpose = (s8)(u8)read8(pData);
+				trk->transpose = (s8)(u8)read8_o(pData, trk);
 				break;
 			}
 
 			case SSEQ_CMD_PITCHBEND:
 			{
-				trk->pitchBend = (s8)(u8)read8(pData);
+				trk->pitchBend = (s8)(u8)read8_o(pData, trk);
 				FSS_TrackUpdateFlags[handle] |= TUF_TIMER;
 				break;
 			}
@@ -741,25 +775,25 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_ATTACK:
 			{
-				trk->a = read8(pData);
+				trk->a = read8_o(pData, trk);
 				break;
 			}
 
 			case SSEQ_CMD_DECAY:
 			{
-				trk->d = read8(pData);
+				trk->d = read8_o(pData, trk);
 				break;
 			}
 
 			case SSEQ_CMD_SUSTAIN:
 			{
-				trk->s = read8(pData);
+				trk->s = read8_o(pData, trk);
 				break;
 			}
 
 			case SSEQ_CMD_RELEASE:
 			{
-				trk->r = read8(pData);
+				trk->r = read8_o(pData, trk);
 				break;
 			}
 
@@ -785,14 +819,14 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_PORTATIME:
 			{
-				trk->portaTime = read8(pData);
+				trk->portaTime = read8_o(pData, trk);
 				// Update here?
 				break;
 			}
 
 			case SSEQ_CMD_SWEEPPITCH:
 			{
-				trk->sweepPitch = (s16)(u16)read16(pData);
+				trk->sweepPitch = (s16)(u16)read16_o(pData, trk);
 				// Update here?
 				break;
 			}
@@ -803,14 +837,14 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_MODDEPTH:
 			{
-				trk->modDepth = read8(pData);
+				trk->modDepth = read8_o(pData, trk);
 				FSS_TrackUpdateFlags[handle] |= TUF_MOD;
 				break;
 			}
 
 			case SSEQ_CMD_MODSPEED:
 			{
-				trk->modSpeed = read8(pData);
+				trk->modSpeed = read8_o(pData, trk);
 				FSS_TrackUpdateFlags[handle] |= TUF_MOD;
 				break;
 			}
@@ -831,7 +865,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_MODDELAY:
 			{
-				trk->modDelay = read16(pData);
+				trk->modDelay = read16_o(pData, trk);
 				FSS_TrackUpdateFlags[handle] |= TUF_MOD;
 				break;
 			}
@@ -840,27 +874,32 @@ void Track_Run(int handle)
 			// Variable-related commands
 			//-----------------------------------------------------------------
 
-			case SSEQ_CMD_RANDOM: // TODO
+			case SSEQ_CMD_RANDOM:
 			{
-				*pData += 5;
+				trk->state |= TS_OVRBIT;
+				int min = (s16)(u16)read16(pData);
+				int max = (s16)(u16)read16(pData);
+				trk->ovrValue = Cnv_Random() % (max-min) + min;
 				break;
 			}
 
-			case SSEQ_CMD_PRINTVAR: // TODO
+			case SSEQ_CMD_VAR:
 			{
-				*pData += 1;
+				trk->state |= TS_OVRBIT | TS_OVRVARBIT;
 				break;
 			}
 
-			case SSEQ_CMD_UNSUP1: // TODO
+			case SSEQ_CMD_IF:
 			{
-				int t = read8(pData);
-				if (t >= SSEQ_CMD_UNSUP2_LO && t <= SSEQ_CMD_UNSUP2_HI) *pData += 1;
-				*pData += 1;
+				if (trk->state & TS_IFSKIPBIT)
+				{
+					trk->state &= ~TS_IFSKIPBIT;
+					// TODO: skip next command
+				}
 				break;
 			}
 
-			case SSEQ_CMD_IF: // TODO
+			case SSEQ_CMD_PRINTVAR:
 			{
 				break;
 			}
