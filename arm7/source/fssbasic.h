@@ -7,8 +7,8 @@ void Snd_SetOutputFlags(int flags);
 
 int Cnv_Attack(int x);
 int Cnv_Fall(int x);
-int Cnv_Sust(int x);
-#define Cnv_Vol Cnv_Sust
+int Cnv_Sust(int x); // quadratic volume curve
+int Cnv_Vol(int x); // linear volume curve
 
 enum { TYPE_PCM, TYPE_PSG, TYPE_NOISE };
 int Chn_Alloc(int type, int prio);

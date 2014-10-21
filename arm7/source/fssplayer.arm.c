@@ -125,7 +125,7 @@ static void Track_ClearState(fss_track_t* trk)
 	trk->portaKey = 60;
 	trk->portaTime = 0;
 	trk->sweepPitch = 0;
-	trk->vol = 64;
+	trk->vol = 127;
 	trk->expr = 127;
 	trk->pan = 0;
 	trk->pitchBendRange = 2;
@@ -289,8 +289,8 @@ static inline void Chn_UpdateVol(fss_channel_t* chn, fss_track_t* trk)
 {
 	int vol = trk->ply->masterVol;
 	vol += trk->ply->userVol;
-	vol += Cnv_Vol(trk->vol);
-	vol += Cnv_Vol(trk->expr);
+	vol += Cnv_Sust(trk->vol);
+	vol += Cnv_Sust(trk->expr);
 	if (vol < -AMPL_K) vol = -AMPL_K;
 	chn->extAmpl = vol;
 }
@@ -427,7 +427,7 @@ _ReadRecord:
 	chn->key = key;
 	chn->orgKey = bIsPCM ? pNoteDef->tnote : 69;
 	chn->patch = trk->patch;
-	chn->velocity = Cnv_Vol(vel);
+	chn->velocity = Cnv_Sust(vel);
 	chn->pan = (int)pNoteDef->pan - 64;
 	chn->modDelayCnt = 0;
 	chn->modCounter = 0;
@@ -468,7 +468,7 @@ int Note_On_Tie(int trkNo, int key, int vel)
 	chn->flags = 0;
 	chn->prio = FSS_Tracks[trkNo].prio;
 	chn->key = key;
-	chn->velocity = Cnv_Vol(vel);
+	chn->velocity = Cnv_Sust(vel);
 	chn->modDelayCnt = 0;
 	chn->modCounter = 0;
 
@@ -645,7 +645,7 @@ void Track_Run(int handle)
 
 			case SSEQ_CMD_MASTERVOL:
 			{
-				trk->ply->masterVol = Cnv_Vol(read8(pData));
+				trk->ply->masterVol = Cnv_Sust(read8(pData));
 				register int i;
 				fss_player_t* ply = trk->ply;
 				u8* tIds = ply->trackIds;
