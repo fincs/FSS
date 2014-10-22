@@ -216,5 +216,7 @@ void Cmd_ChannelRead(fss_chndata_t* data, int param)
 	data->pan = (chn->reg.CR >> 16) & 0x7F;
 	data->key = chn->key;
 	data->vol = FSS_ChnVol[param];
+	if (data->vol == 0x7FF)
+		data->vol = 0;
 	data->patch = chn->patch;
 }

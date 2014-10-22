@@ -466,6 +466,7 @@ _ReadRecord:
 	chn->modDelayCnt = 0;
 	chn->modCounter = 0;
 	FSS_NoteLengths[nCh] = len;
+	FSS_ChnVol[nCh] = 0x7FF;
 
 	chn->attackLvl = Cnv_Attack(trk->a == 0xFF ? pNoteDef->a : trk->a);
 	chn->decayRate = Cnv_Fall(trk->d == 0xFF ? pNoteDef->d : trk->d);
