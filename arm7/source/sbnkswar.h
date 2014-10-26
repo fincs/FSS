@@ -27,6 +27,11 @@ static inline const SWAVINFO* GetWavInWar(const u8* pWar, int id)
 	return (const SWAVINFO*)(pWar + ((const int*)(pWar+60))[id]);
 }
 
+static inline u32 GetBnkInstrCount(const u8* pBnk)
+{
+	return *(const u32*)(pBnk + 56);
+}
+
 static inline u32 GetInstrInBnk(const u8* pBnk, int id)
 {
 	return *(const u32*)(pBnk + 60 + sizeof(u32)*id);

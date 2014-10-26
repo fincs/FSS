@@ -21,7 +21,6 @@ static void PrepareCh(fss_channel_t* pCh, int nCh)
 	//pCh->decayRate = 0;
 	pCh->releaseRate = 0xFFFF;
 
-	FSS_ChnVol[nCh] = 0;
 	FSS_NoteLengths[nCh] = -1;
 }
 

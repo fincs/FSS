@@ -114,9 +114,9 @@ static int readvl(const u8** ppData)
 	return x;
 }
 
-static inline vs16* getVarPtr(int var, int trkId)
+static inline vs16* getVarPtr(int var, fss_track_t* trk)
 {
-	return _FSS_GetVarPtr(FSS_SharedWork, trkId, var);
+	return _FSS_GetVarPtr(FSS_SharedWork, trk->ply-FSS_Players, var);
 }
 
 static int readovr(const u8** ppData, fss_track_t* trk)
@@ -125,7 +125,7 @@ static int readovr(const u8** ppData, fss_track_t* trk)
 	if (trk->state & TS_OVRVARBIT)
 	{
 		trk->state &= ~TS_OVRVARBIT;
-		return *getVarPtr(read8(ppData), trk-FSS_Tracks);
+		return *getVarPtr(read8(ppData), trk);
 	}
 	return trk->ovrValue;
 }
@@ -389,6 +389,9 @@ int Note_On(int trkNo, int key, int vel, int len)
 	fss_channel_t* chn;
 	int nCh;
 
+	if (trk->patch > GetBnkInstrCount(pBnk))
+		return -1;
+
 	u32 instInfo = GetInstrInBnk(pBnk, trk->patch);
 	const u8* pInstData = GetInstData(pBnk, instInfo);
 	const SBNKNOTEDEF* pNoteDef = NULL;
@@ -466,7 +469,6 @@ _ReadRecord:
 	chn->modDelayCnt = 0;
 	chn->modCounter = 0;
 	FSS_NoteLengths[nCh] = len;
-	FSS_ChnVol[nCh] = 0x7FF;
 
 	chn->attackLvl = Cnv_Attack(trk->a == 0xFF ? pNoteDef->a : trk->a);
 	chn->decayRate = Cnv_Fall(trk->d == 0xFF ? pNoteDef->d : trk->d);

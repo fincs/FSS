@@ -172,12 +172,12 @@ typedef struct
 	s16 playerVars[FSS_PLAYERCOUNT][FSS_PLAYERVARCOUNT];
 } fss_sharedwork_t;
 
-static inline vs16* _FSS_GetVarPtr(volatile fss_sharedwork_t* sw, int trkId, int varId)
+static inline vs16* _FSS_GetVarPtr(volatile fss_sharedwork_t* sw, int plyId, int varId)
 {
 	if (varId < 0 || varId > (FSS_PLAYERVARCOUNT+FSS_GLOBALVARCOUNT))
 		varId = 0;
 	if (varId < FSS_PLAYERVARCOUNT)
-		return &sw->playerVars[trkId][varId];
+		return &sw->playerVars[plyId][varId];
 	return sw->globalVars + varId - FSS_PLAYERVARCOUNT;
 }
 
